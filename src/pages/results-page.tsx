@@ -6,8 +6,8 @@ import ItineraryTimeline from "@/components/itinerary-timeline";
 import MapView from "@/components/map-view";
 import type { PlaceRecommendation, AggregatedResponse, RecommendRequest } from "@/types";
 import {
-  ArrowLeft, Clock, Wallet, MapPin, Lightbulb,
-  List, Map as MapIcon, Leaf,
+  Clock, Wallet, MapPin, Lightbulb,
+  List, Map as MapIcon,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -57,41 +57,25 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--t-bg)" }}>
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 backdrop-blur-lg"
-        style={{ background: "rgba(250, 248, 245, 0.85)", borderBottom: "1px solid var(--t-border)" }}
-      >
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/explore")} className="rounded-xl">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Leaf className="w-5 h-5" style={{ color: "var(--t-forest-500)" }} />
-              <span className="text-xl font-bold t-gradient-text">Your Itinerary</span>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === "itinerary" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("itinerary")}
-              style={viewMode === "itinerary" ? { background: "var(--t-forest-600)" } : {}}
-            >
-              <List className="w-4 h-4 mr-1" /> Itinerary
-            </Button>
-            <Button
-              variant={viewMode === "all-places" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setViewMode("all-places")}
-              style={viewMode === "all-places" ? { background: "var(--t-forest-600)" } : {}}
-            >
-              <MapIcon className="w-4 h-4 mr-1" /> All Places
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* View mode toggle */}
+      <div className="container mx-auto px-6 pt-4 pb-2 flex justify-center gap-2">
+        <Button
+          variant={viewMode === "itinerary" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setViewMode("itinerary")}
+          style={viewMode === "itinerary" ? { background: "var(--t-forest-600)" } : {}}
+        >
+          <List className="w-4 h-4 mr-1" /> Itinerary
+        </Button>
+        <Button
+          variant={viewMode === "all-places" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setViewMode("all-places")}
+          style={viewMode === "all-places" ? { background: "var(--t-forest-600)" } : {}}
+        >
+          <MapIcon className="w-4 h-4 mr-1" /> All Places
+        </Button>
+      </div>
 
       <div className="container mx-auto px-6 py-6">
         {/* Summary */}

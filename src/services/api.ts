@@ -1,16 +1,33 @@
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
+function getToken(): string | null {
+  return localStorage.getItem("turismo_token");
+}
+
 async function request<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: { "Content-Type": "application/json" },
+    headers,
     ...options,
   });
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
+
+    // Auto-logout on 401
+    if (response.status === 401) {
+      localStorage.removeItem("turismo_token");
+      localStorage.removeItem("turismo_user");
+    }
+
     throw new Error(
       error.message || error.error || `Request failed: ${response.status}`
     );

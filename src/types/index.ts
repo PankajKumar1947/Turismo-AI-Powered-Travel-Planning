@@ -86,3 +86,36 @@ export interface GeocodeResult {
   lng: number;
   displayName: string;
 }
+
+// ── Auth types ──
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  preferences: {
+    categories: string[];
+    budgetRange: string;
+  };
+  createdAt: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  data: {
+    token: string;
+    user: AuthUser;
+  };
+}
+
+// ── Saved Itinerary types ──
+
+export interface SavedItinerary {
+  _id: string;
+  userId: string;
+  city: string;
+  itinerary: AggregatedResponse;
+  request: RecommendRequest;
+  places: PlaceRecommendation[];
+  createdAt: string;
+}

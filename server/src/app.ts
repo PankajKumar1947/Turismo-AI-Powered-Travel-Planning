@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import authRoutes from "./routes/auth";
 import recommendRoutes from "./routes/recommend";
 import itineraryRoutes from "./routes/itinerary";
 import geocodeRoutes from "./routes/geocode";
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // ── Routes ──
+app.use("/api/auth", authRoutes);
 app.use("/api/recommend", recommendRoutes);
 app.use("/api/itineraries", itineraryRoutes);
 app.use("/api/geocode", geocodeRoutes);

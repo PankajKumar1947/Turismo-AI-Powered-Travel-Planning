@@ -13,12 +13,14 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { useAuth } from "@/hooks/use-auth";
 import {
   useFindPlaces,
   useFindRoutes,
   useAggregate,
   useGeocodeForward,
 } from "@/hooks/use-recommendations";
+import { saveItinerary } from "@/react-query/auth.queries";
 import PlaceCard from "@/components/place-card";
 import RouteInfo from "@/components/route-info";
 import type {
@@ -51,6 +53,7 @@ const stepLabels = ["Preferences", "Pick Places", "Pick Routes"];
 export default function ExplorePage() {
   const navigate = useNavigate();
   const { location, loading: geoLoading, requestLocation } = useGeolocation();
+  const { isAuthenticated } = useAuth();
 
   const [cityQuery, setCityQuery] = useState("");
   const [resolvedCity, setResolvedCity] = useState("");
@@ -141,9 +144,22 @@ export default function ExplorePage() {
     }
     aggregateMutation.mutate(
       { places, routes: filteredRoutes, request: savedRequest },
-      { onSuccess: (result) => navigate("/results", { state: { result: { places, itinerary: result.data }, request: savedRequest } }) }
+      {
+        onSuccess: (result) => {
+          // Auto-save if authenticated
+          if (isAuthenticated) {
+            saveItinerary({
+              city: savedRequest.cityName || "Unknown City",
+              itinerary: result.data,
+              request: savedRequest,
+              places,
+            }).catch(console.error);
+          }
+          navigate("/results", { state: { result: { places, itinerary: result.data }, request: savedRequest } });
+        },
+      }
     );
-  }, [savedRequest, placesMutation.data, routesMutation.data, selectedPlaces, selectedRoutes, aggregateMutation, navigate]);
+  }, [savedRequest, placesMutation.data, routesMutation.data, selectedPlaces, selectedRoutes, aggregateMutation, navigate, isAuthenticated]);
 
   const togglePlace = (name: string) => {
     setSelectedPlaces((prev) => {
@@ -182,43 +198,27 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--t-bg)" }}>
-      {/* Header */}
-      <header
-        className="sticky top-0 z-50 backdrop-blur-lg"
-        style={{ background: "rgba(250, 248, 245, 0.85)", borderBottom: "1px solid var(--t-border)" }}
-      >
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="rounded-xl">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Leaf className="w-5 h-5" style={{ color: "var(--t-forest-500)" }} />
-              <span className="text-xl font-bold t-gradient-text">Turismo</span>
-            </div>
-          </div>
-
-          {/* Step indicator */}
-          <div className="flex items-center gap-1">
-            {stepLabels.map((label, i) => (
-              <div key={label} className="flex items-center gap-1">
-                {i > 0 && <div className="w-8 h-px mx-1" style={{ background: i <= stepIndex ? "var(--t-forest-300)" : "var(--t-sand-300)" }} />}
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                  style={{
-                    background: i === stepIndex ? "var(--t-forest-600)" : i < stepIndex ? "var(--t-forest-50)" : "var(--t-sand-100)",
-                    color: i === stepIndex ? "white" : i < stepIndex ? "var(--t-forest-700)" : "var(--t-stone-400)",
-                  }}
-                >
-                  {i < stepIndex ? <Check className="w-3 h-3" /> : null}
-                  <span className="hidden sm:inline">{label}</span>
-                  <span className="sm:hidden">{i + 1}</span>
-                </div>
+      {/* Step indicator bar */}
+      <div className="container mx-auto px-6 pt-4 pb-2">
+        <div className="flex items-center justify-center gap-1">
+          {stepLabels.map((label, i) => (
+            <div key={label} className="flex items-center gap-1">
+              {i > 0 && <div className="w-8 h-px mx-1" style={{ background: i <= stepIndex ? "var(--t-forest-300)" : "var(--t-sand-300)" }} />}
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                style={{
+                  background: i === stepIndex ? "var(--t-forest-600)" : i < stepIndex ? "var(--t-forest-50)" : "var(--t-sand-100)",
+                  color: i === stepIndex ? "white" : i < stepIndex ? "var(--t-forest-700)" : "var(--t-stone-400)",
+                }}
+              >
+                {i < stepIndex ? <Check className="w-3 h-3" /> : null}
+                <span className="hidden sm:inline">{label}</span>
+                <span className="sm:hidden">{i + 1}</span>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-6 py-8 max-w-2xl">
 
