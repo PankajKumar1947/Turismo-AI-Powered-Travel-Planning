@@ -1,0 +1,160 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./design-token.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ── Nature Theme: shadcn integration ── */
+:root {
+  --radius: 0.75rem;
+  --background: var(--t-sand-50);
+  --foreground: var(--t-stone-800);
+  --card: #ffffff;
+  --card-foreground: var(--t-stone-800);
+  --popover: #ffffff;
+  --popover-foreground: var(--t-stone-800);
+  --primary: var(--t-forest-600);
+  --primary-foreground: #ffffff;
+  --secondary: var(--t-sand-100);
+  --secondary-foreground: var(--t-stone-700);
+  --muted: var(--t-sand-200);
+  --muted-foreground: var(--t-stone-500);
+  --accent: var(--t-forest-50);
+  --accent-foreground: var(--t-forest-700);
+  --destructive: var(--t-terra-600);
+  --border: var(--t-sand-200);
+  --input: var(--t-sand-200);
+  --ring: var(--t-forest-400);
+  --chart-1: var(--t-forest-500);
+  --chart-2: var(--t-amber-500);
+  --chart-3: var(--t-sky-500);
+  --chart-4: var(--t-terra-500);
+  --chart-5: var(--t-sand-500);
+  --sidebar: var(--t-forest-800);
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: var(--t-forest-500);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--t-forest-700);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: var(--t-forest-700);
+  --sidebar-ring: var(--t-forest-400);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ── Utility classes using design tokens ── */
+@layer utilities {
+  .t-card {
+    background: var(--t-bg-elevated);
+    border: 1px solid var(--t-border);
+    border-radius: var(--t-radius-xl);
+    box-shadow: var(--t-shadow-sm);
+    transition: all var(--t-duration) var(--t-ease);
+  }
+
+  .t-card:hover {
+    box-shadow: var(--t-shadow-md);
+    border-color: var(--t-forest-200);
+  }
+
+  .t-card-selected {
+    border-color: var(--t-forest-400);
+    box-shadow: var(--t-shadow-glow);
+    background: var(--t-forest-50);
+  }
+
+  .t-gradient-text {
+    background: linear-gradient(135deg, var(--t-forest-600), var(--t-forest-400));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .t-btn-primary {
+    background: var(--t-gradient-primary);
+    color: white;
+    border-radius: var(--t-radius-lg);
+    box-shadow: var(--t-shadow-md);
+    transition: all var(--t-duration) var(--t-ease);
+  }
+
+  .t-btn-primary:hover {
+    box-shadow: var(--t-shadow-glow);
+    transform: translateY(-1px);
+  }
+
+  .t-section-bg {
+    background: var(--t-gradient-hero);
+  }
+
+  .t-badge-nature {
+    background: var(--t-forest-50);
+    color: var(--t-forest-700);
+    border: 1px solid var(--t-forest-200);
+  }
+
+  .t-badge-warm {
+    background: var(--t-amber-50);
+    color: var(--t-amber-700);
+    border: 1px solid var(--t-amber-200);
+  }
+
+  .t-badge-info {
+    background: var(--t-sky-50);
+    color: var(--t-sky-700);
+    border: 1px solid var(--t-sky-200);
+  }
+}

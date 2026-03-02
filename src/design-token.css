@@ -1,0 +1,135 @@
+/* ═══════════════════════════════════════════════════════
+   Turismo — Nature-Inspired Design Tokens
+   A warm, earthy palette: forest canopy, golden light,
+   river blues, and terracotta warmth.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Core Nature Palette ── */
+  --t-forest-50: #f0faf0;
+  --t-forest-100: #dcf2dc;
+  --t-forest-200: #b5e3b5;
+  --t-forest-300: #7ccc7c;
+  --t-forest-400: #4aaf4a;
+  --t-forest-500: #2d8a3f;
+  --t-forest-600: #1f6f32;
+  --t-forest-700: #195929;
+  --t-forest-800: #174722;
+  --t-forest-900: #0f2e17;
+
+  --t-amber-50: #fffbeb;
+  --t-amber-100: #fef3c7;
+  --t-amber-200: #fde68a;
+  --t-amber-300: #fcd34d;
+  --t-amber-400: #fbbf24;
+  --t-amber-500: #f59e0b;
+  --t-amber-600: #d97706;
+  --t-amber-700: #b45309;
+  --t-amber-800: #92400e;
+  --t-amber-900: #78350f;
+
+  --t-sky-50: #f0f9ff;
+  --t-sky-100: #e0f2fe;
+  --t-sky-200: #bae6fd;
+  --t-sky-300: #7dd3fc;
+  --t-sky-400: #38bdf8;
+  --t-sky-500: #0ea5e9;
+  --t-sky-600: #0284c7;
+  --t-sky-700: #0369a1;
+  --t-sky-800: #075985;
+  --t-sky-900: #0c4a6e;
+
+  --t-terra-50: #fdf4f0;
+  --t-terra-100: #fae3d9;
+  --t-terra-200: #f4c6b3;
+  --t-terra-300: #eda083;
+  --t-terra-400: #e57a54;
+  --t-terra-500: #d4613b;
+  --t-terra-600: #b54a2a;
+  --t-terra-700: #933c23;
+  --t-terra-800: #7a3320;
+  --t-terra-900: #5c261a;
+
+  /* ── Neutral Warm Tones ── */
+  --t-sand-50: #faf8f5;
+  --t-sand-100: #f5f0ea;
+  --t-sand-200: #ebe3d8;
+  --t-sand-300: #ddd2c2;
+  --t-sand-400: #c4b49d;
+  --t-sand-500: #a69479;
+  --t-sand-600: #8a785e;
+  --t-sand-700: #6e5f4a;
+  --t-sand-800: #564a3a;
+  --t-sand-900: #3d352b;
+
+  --t-stone-50: #f9fafb;
+  --t-stone-100: #f3f4f6;
+  --t-stone-200: #e5e7eb;
+  --t-stone-300: #d1d5db;
+  --t-stone-400: #9ca3af;
+  --t-stone-500: #6b7280;
+  --t-stone-600: #4b5563;
+  --t-stone-700: #374151;
+  --t-stone-800: #1f2937;
+  --t-stone-900: #111827;
+
+  /* ── Semantic Tokens ── */
+  --t-bg: var(--t-sand-50);
+  --t-bg-elevated: #ffffff;
+  --t-bg-sunken: var(--t-sand-100);
+  --t-bg-overlay: rgba(15, 46, 23, 0.6);
+
+  --t-text: var(--t-stone-800);
+  --t-text-secondary: var(--t-stone-500);
+  --t-text-muted: var(--t-sand-500);
+  --t-text-inverse: #ffffff;
+
+  --t-border: var(--t-sand-200);
+  --t-border-subtle: var(--t-sand-100);
+  --t-border-focus: var(--t-forest-400);
+
+  --t-primary: var(--t-forest-600);
+  --t-primary-light: var(--t-forest-50);
+  --t-primary-hover: var(--t-forest-700);
+
+  --t-accent: var(--t-amber-500);
+  --t-accent-light: var(--t-amber-50);
+  --t-accent-hover: var(--t-amber-600);
+
+  --t-info: var(--t-sky-500);
+  --t-info-light: var(--t-sky-50);
+
+  --t-warm: var(--t-terra-500);
+  --t-warm-light: var(--t-terra-50);
+
+  --t-success: var(--t-forest-500);
+  --t-error: var(--t-terra-600);
+  --t-warning: var(--t-amber-600);
+
+  /* ── Gradients ── */
+  --t-gradient-hero: linear-gradient(135deg, var(--t-forest-50), var(--t-sand-50), var(--t-amber-50));
+  --t-gradient-primary: linear-gradient(135deg, var(--t-forest-600), var(--t-forest-500));
+  --t-gradient-warm: linear-gradient(135deg, var(--t-amber-500), var(--t-terra-400));
+  --t-gradient-card: linear-gradient(180deg, var(--t-sand-50), #ffffff);
+
+  /* ── Shadows ── */
+  --t-shadow-sm: 0 1px 2px rgba(15, 46, 23, 0.05);
+  --t-shadow-md: 0 4px 12px rgba(15, 46, 23, 0.08);
+  --t-shadow-lg: 0 8px 30px rgba(15, 46, 23, 0.12);
+  --t-shadow-glow: 0 0 20px rgba(45, 138, 63, 0.15);
+  --t-shadow-warm: 0 4px 16px rgba(245, 158, 11, 0.15);
+
+  /* ── Spacing ── */
+  --t-radius-sm: 8px;
+  --t-radius-md: 12px;
+  --t-radius-lg: 16px;
+  --t-radius-xl: 20px;
+  --t-radius-2xl: 24px;
+  --t-radius-full: 9999px;
+
+  /* ── Transitions ── */
+  --t-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-duration-fast: 150ms;
+  --t-duration: 250ms;
+  --t-duration-slow: 400ms;
+}
