@@ -7,7 +7,7 @@ import {
   type FetchRoutesInput,
   type AggregateInput,
 } from "@/react-query/recommend.queries";
-import { fetchGeocodeForward, geocodeQueries } from "@/react-query/geocode.queries";
+import { fetchGeocodeForward, fetchGeocodeReverse, geocodeQueries } from "@/react-query/geocode.queries";
 import type { PlaceRecommendation, RecommendRequest, RouteOption, AggregatedResponse, GeocodeResult } from "@/types";
 
 /**
@@ -63,5 +63,18 @@ export function useGeocodeForward() {
   >({
     mutationKey: geocodeQueries.forward.key,
     mutationFn: fetchGeocodeForward,
+  });
+}
+/**
+ * Reverse geocode coordinates → city name
+ */
+export function useGeocodeReverse() {
+  return useMutation<
+    { success: boolean; data: { cityName: string } },
+    Error,
+    { lat: number; lng: number }
+  >({
+    mutationKey: geocodeQueries.reverse.key,
+    mutationFn: ({ lat, lng }) => fetchGeocodeReverse(lat, lng),
   });
 }

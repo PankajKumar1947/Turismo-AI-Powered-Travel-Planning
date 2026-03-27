@@ -19,14 +19,18 @@ import {
   useFindRoutes,
   useAggregate,
   useGeocodeForward,
+  useGeocodeReverse,
 } from "@/hooks/use-recommendations";
 import { saveItinerary } from "@/react-query/auth.queries";
+import { useEffect } from "react";
 import PlaceCard from "@/components/place-card";
 import RouteInfo from "@/components/route-info";
 import type {
   GroupType,
   RecommendRequest,
   RouteOption,
+  GeocodeResult,
+  PlaceRecommendation,
 } from "@/types";
 import {
   MapPin, Clock, Wallet, Users, Search, Loader2,
@@ -73,14 +77,26 @@ export default function ExplorePage() {
   const routesMutation = useFindRoutes();
   const aggregateMutation = useAggregate();
   const geocodeMutation = useGeocodeForward();
+  const geocodeReverse = useGeocodeReverse();
 
   const effectiveLocation = location || manualLocation;
   const stepIndex = step === "input" ? 0 : step === "places" ? 1 : 2;
 
+  // Auto-resolve city name when current location is fetched
+  useEffect(() => {
+    if (location) {
+      geocodeReverse.mutate(location, {
+        onSuccess: (result) => {
+          setResolvedCity(result.data.cityName);
+        },
+      });
+    }
+  }, [location, geocodeReverse.mutate]);
+
   const handleCitySearch = useCallback(() => {
     if (!cityQuery.trim()) return;
     geocodeMutation.mutate(cityQuery, {
-      onSuccess: (result) => {
+      onSuccess: (result: { data: GeocodeResult }) => {
         if (result.data) {
           setManualLocation({ lat: result.data.lat, lng: result.data.lng });
           setResolvedCity(result.data.displayName);
@@ -102,8 +118,8 @@ export default function ExplorePage() {
     };
     setSavedRequest(request);
     placesMutation.mutate(request, {
-      onSuccess: (result) => {
-        const recommended = new Set(result.data.slice(0, 5).map((p) => p.name));
+      onSuccess: (result: { data: PlaceRecommendation[] }) => {
+        const recommended = new Set(result.data.slice(0, 5).map((p: PlaceRecommendation) => p.name));
         setSelectedPlaces(recommended);
         setStep("places");
       },
@@ -116,10 +132,10 @@ export default function ExplorePage() {
     routesMutation.mutate(
       { origin: effectiveLocation, selectedPlaces: places.map((p) => ({ name: p.name, location: p.location })) },
       {
-        onSuccess: (result) => {
+        onSuccess: (result: { data: Record<string, RouteOption[]> }) => {
           const autoSelected: Record<string, string> = {};
           for (const [placeName, routes] of Object.entries(result.data)) {
-            const recommended = routes.find((r) => r.recommended);
+            const recommended = routes.find((r: RouteOption) => r.recommended);
             autoSelected[placeName] = recommended?.mode || routes[0]?.mode || "";
           }
           setSelectedRoutes(autoSelected);
@@ -145,7 +161,7 @@ export default function ExplorePage() {
     aggregateMutation.mutate(
       { places, routes: filteredRoutes, request: savedRequest },
       {
-        onSuccess: (result) => {
+        onSuccess: (result: { data: AggregatedResponse }) => {
           // Auto-save if authenticated
           if (isAuthenticated) {
             saveItinerary({
@@ -220,180 +236,202 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8 max-w-2xl">
+      <div className="container mx-auto px-6 py-12 max-w-6xl">
 
         {/* ═══ STEP 1: Input ═══ */}
         {step === "input" && (
-          <div className="space-y-5 animate-in fade-in duration-300">
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-bold mb-2" style={{ color: "var(--t-stone-800)" }}>
-                Plan Your Adventure
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight" style={{ color: "var(--t-stone-800)" }}>
+                Plan Your <span className="t-gradient-text">Adventure</span>
               </h2>
-              <p style={{ color: "var(--t-stone-500)" }}>
-                Set your constraints, our AI agents will guide you step by step.
+              <p className="text-lg max-w-2xl mx-auto" style={{ color: "var(--t-stone-500)" }}>
+                Set your constraints, and our AI-powered multi-agent system will craft your perfect journey.
               </p>
             </div>
 
-            {/* Location */}
-            <Card className="t-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <MapPin className="w-5 h-5" style={{ color: "var(--t-forest-500)" }} /> Location
-                </CardTitle>
-                <CardDescription>Where do you want to explore?</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Search a city (e.g., Kolkata, Paris, Tokyo)"
-                    value={cityQuery}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCityQuery(e.target.value)}
-                    onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleCitySearch()}
-                    className="flex-1"
-                  />
-                  <Button variant="secondary" onClick={handleCitySearch} disabled={geocodeMutation.isPending}>
-                    {geocodeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-                  </Button>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-px flex-1" style={{ background: "var(--t-border)" }} />
-                  <span className="text-xs" style={{ color: "var(--t-stone-400)" }}>or</span>
-                  <div className="h-px flex-1" style={{ background: "var(--t-border)" }} />
-                </div>
-                <Button variant="outline" className="w-full" onClick={requestLocation} disabled={geoLoading}>
-                  {geoLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Navigation className="w-4 h-4 mr-2" />}
-                  Use My Current Location
-                </Button>
-                {effectiveLocation && (
-                  <div className="text-sm flex items-center gap-1" style={{ color: "var(--t-forest-600)" }}>
-                    <MapPin className="w-3 h-3" />
-                    {resolvedCity || `${effectiveLocation.lat.toFixed(4)}, ${effectiveLocation.lng.toFixed(4)}`}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: Location & Preferences */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Location */}
+                <Card className="t-card h-full">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <MapPin className="w-5 h-5" style={{ color: "var(--t-forest-500)" }} /> Location
+                    </CardTitle>
+                    <CardDescription>Where do you want to explore?</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Search a city (e.g., Kolkata, Paris, Tokyo)"
+                        value={cityQuery}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCityQuery(e.target.value)}
+                        onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleCitySearch()}
+                        className="flex-1"
+                      />
+                      <Button variant="secondary" onClick={handleCitySearch} disabled={geocodeMutation.isPending}>
+                        {geocodeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="h-px flex-1" style={{ background: "var(--t-border)" }} />
+                      <span className="text-xs" style={{ color: "var(--t-stone-400)" }}>or</span>
+                      <div className="h-px flex-1" style={{ background: "var(--t-border)" }} />
+                    </div>
+                    <Button variant="outline" className="w-full" onClick={requestLocation} disabled={geoLoading}>
+                      {geoLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Navigation className="w-4 h-4 mr-2" />}
+                      Use My Current Location
+                    </Button>
+                    {effectiveLocation && (
+                      <div className="p-3 rounded-xl bg-forest-50/50 border border-forest-100 space-y-1" style={{ color: "var(--t-forest-700)" }}>
+                        <div className="flex items-center gap-2 text-sm font-bold">
+                          <MapPin className="w-4 h-4 text-forest-500" />
+                          {geocodeReverse.isPending ? (
+                            <span className="flex items-center gap-2 italic font-normal opacity-60">
+                              <Loader2 className="w-3 h-3 animate-spin" /> Resolving location...
+                            </span>
+                          ) : (
+                            resolvedCity || "Location Selected"
+                          )}
+                        </div>
+                        <div className="text-xs ml-6 flex items-center gap-1">
+                          <Navigation className="w-2.5 h-2.5" />
+                          {effectiveLocation.lat.toFixed(6)}, {effectiveLocation.lng.toFixed(6)}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-            {/* Time */}
-            <Card className="t-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="w-5 h-5" style={{ color: "var(--t-sky-600)" }} /> Available Time
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm" style={{ color: "var(--t-stone-500)" }}>How much time do you have?</span>
-                  <Badge className="t-badge-nature text-base px-3 py-1 font-mono">{formatTime(time[0]!)}</Badge>
-                </div>
-                <Slider value={time} onValueChange={setTime} min={30} max={4320} step={30} />
-                <div className="flex justify-between text-xs" style={{ color: "var(--t-stone-400)" }}>
-                  <span>30 min</span><span>3 days</span>
-                </div>
-              </CardContent>
-            </Card>
+                {/* Preferences */}
+                <Card className="t-card">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" style={{ color: "var(--t-amber-500)" }} /> Preferences
+                      <span className="text-xs font-normal" style={{ color: "var(--t-stone-400)" }}>(optional)</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => toggleCategory(cat)}
+                          className="px-4 py-2 rounded-xl text-sm capitalize transition-all font-semibold"
+                          style={{
+                            background: selectedCategories.includes(cat) ? "var(--t-forest-600)" : "var(--t-sand-50)",
+                            color: selectedCategories.includes(cat) ? "white" : "var(--t-stone-600)",
+                            border: `1px solid ${selectedCategories.includes(cat) ? "var(--t-forest-600)" : "var(--t-sand-200)"}`,
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-            {/* Budget */}
-            <Card className="t-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Wallet className="w-5 h-5" style={{ color: "var(--t-amber-600)" }} /> Budget
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 items-center">
-                  <Label style={{ color: "var(--t-stone-500)" }} className="whitespace-nowrap">Total budget</Label>
-                  <Input type="number" placeholder="e.g., 2000" value={budget} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBudget(e.target.value)} className="flex-1" />
-                </div>
-                <p className="text-xs mt-2" style={{ color: "var(--t-stone-400)" }}>Enter in local currency (INR, USD, EUR, etc.)</p>
-              </CardContent>
-            </Card>
+              {/* Right Column: Time, Budget, Group */}
+              <div className="lg:col-span-5 space-y-6">
+                {/* Time */}
+                <Card className="t-card">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Clock className="w-5 h-5" style={{ color: "var(--t-sky-600)" }} /> Time
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm" style={{ color: "var(--t-stone-500)" }}>Available duration?</span>
+                      <Badge className="t-badge-nature text-base px-3 py-1 font-mono">{formatTime(time[0]!)}</Badge>
+                    </div>
+                    <Slider value={time} onValueChange={setTime} min={30} max={4320} step={30} />
+                    <div className="flex justify-between text-xs" style={{ color: "var(--t-stone-400)" }}>
+                      <span>30 min</span><span>3 days</span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Group */}
-            <Card className="t-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Users className="w-5 h-5" style={{ color: "var(--t-terra-500)" }} /> Group
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-4 gap-2">
-                  {groupTypes.map((gt) => (
-                    <button
-                      key={gt.value}
-                      onClick={() => {
-                        setGroupType(gt.value);
-                        if (gt.value === "solo") setGroupSize("1");
-                        if (gt.value === "couple") setGroupSize("2");
-                      }}
-                      className="p-3 rounded-xl border text-center transition-all"
-                      style={{
-                        borderColor: groupType === gt.value ? "var(--t-forest-400)" : "var(--t-border)",
-                        background: groupType === gt.value ? "var(--t-forest-50)" : "transparent",
-                        color: groupType === gt.value ? "var(--t-forest-700)" : "var(--t-stone-600)",
-                      }}
-                    >
-                      <div className="flex justify-center mb-1">{gt.icon}</div>
-                      <div className="text-xs font-medium">{gt.label}</div>
-                    </button>
-                  ))}
-                </div>
-                {(groupType === "family" || groupType === "friends") && (
-                  <div className="flex gap-3 items-center">
-                    <Label style={{ color: "var(--t-stone-500)" }} className="whitespace-nowrap">Group size</Label>
-                    <Input type="number" min="2" max="50" value={groupSize} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGroupSize(e.target.value)} className="w-24" />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                {/* Budget */}
+                <Card className="t-card">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Wallet className="w-5 h-5" style={{ color: "var(--t-amber-600)" }} /> Budget
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-3 items-center">
+                      <Label style={{ color: "var(--t-stone-500)" }} className="whitespace-nowrap">Total budget</Label>
+                      <Input type="number" placeholder="e.g., 2000" value={budget} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBudget(e.target.value)} className="flex-1" />
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Preferences */}
-            <Card className="t-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5" style={{ color: "var(--t-amber-500)" }} /> Preferences
-                  <span className="text-xs font-normal" style={{ color: "var(--t-stone-400)" }}>(optional)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => toggleCategory(cat)}
-                      className="px-3 py-1.5 rounded-full text-sm capitalize transition-all font-medium"
-                      style={{
-                        background: selectedCategories.includes(cat) ? "var(--t-forest-600)" : "var(--t-sand-100)",
-                        color: selectedCategories.includes(cat) ? "white" : "var(--t-stone-600)",
-                        border: `1px solid ${selectedCategories.includes(cat) ? "var(--t-forest-600)" : "var(--t-sand-300)"}`,
-                      }}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                {/* Group */}
+                <Card className="t-card">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Users className="w-5 h-5" style={{ color: "var(--t-terra-500)" }} /> Group
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-4 gap-2">
+                      {groupTypes.map((gt) => (
+                        <button
+                          key={gt.value}
+                          onClick={() => {
+                            setGroupType(gt.value);
+                            if (gt.value === "solo") setGroupSize("1");
+                            if (gt.value === "couple") setGroupSize("2");
+                          }}
+                          className="p-3 rounded-xl border text-center transition-all"
+                          style={{
+                            borderColor: groupType === gt.value ? "var(--t-forest-400)" : "var(--t-border)",
+                            background: groupType === gt.value ? "var(--t-forest-50)" : "transparent",
+                            color: groupType === gt.value ? "var(--t-forest-700)" : "var(--t-stone-600)",
+                          }}
+                        >
+                          <div className="flex justify-center mb-1">{gt.icon}</div>
+                          <div className="text-xs font-medium">{gt.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                    {(groupType === "family" || groupType === "friends") && (
+                      <div className="flex gap-3 items-center">
+                        <Label style={{ color: "var(--t-stone-500)" }} className="whitespace-nowrap">Group size</Label>
+                        <Input type="number" min="2" max="50" value={groupSize} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGroupSize(e.target.value)} className="w-24" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
             {currentError && (
-              <div className="text-sm text-center rounded-xl p-3" style={{ background: "var(--t-terra-50)", color: "var(--t-terra-700)", border: "1px solid var(--t-terra-200)" }}>
+              <div className="text-sm text-center rounded-xl p-3 mt-8" style={{ background: "var(--t-terra-50)", color: "var(--t-terra-700)", border: "1px solid var(--t-terra-200)" }}>
                 {currentError}
               </div>
             )}
 
-            <Button
-              size="lg"
-              className="w-full text-lg py-6 rounded-xl t-btn-primary disabled:opacity-50"
-              onClick={handleFindPlaces}
-              disabled={placesMutation.isPending || !effectiveLocation || !budget}
-            >
-              {placesMutation.isPending ? (
-                <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Agent-1 is discovering places...</>
-              ) : (
-                <><Leaf className="w-5 h-5 mr-2" /> Discover Places <ArrowRight className="w-5 h-5 ml-2" /></>
-              )}
-            </Button>
+            <div className="mt-10 max-w-2xl mx-auto">
+              <Button
+                size="lg"
+                className="w-full text-xl py-8 rounded-2xl t-btn-primary shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50"
+                onClick={handleFindPlaces}
+                disabled={placesMutation.isPending || !effectiveLocation || !budget}
+              >
+                {placesMutation.isPending ? (
+                  <><Loader2 className="w-6 h-6 mr-2 animate-spin" /> Agent-1 is discovering places...</>
+                ) : (
+                  <><Leaf className="w-6 h-6 mr-3" /> Start Discovery <ArrowRight className="w-6 h-6 ml-3" /></>
+                )}
+              </Button>
+            </div>
           </div>
         )}
+
 
         {/* ═══ STEP 2: Select Places ═══ */}
         {step === "places" && placesMutation.data && (

@@ -157,4 +157,14 @@
     color: var(--t-sky-700);
     border: 1px solid var(--t-sky-200);
   }
+
+  @keyframes route-flow {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  .animate-route-flow {
+    stroke-dasharray: 10 10;
+    animation: route-flow 20s linear infinite;
+  }
 }
