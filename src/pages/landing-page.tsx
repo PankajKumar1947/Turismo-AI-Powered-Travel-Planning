@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   MapPin, Clock, Wallet, Globe, Sparkles,
   Navigation, TreePine, Compass, SunMedium,
-  ArrowRight, CheckCircle2, Star,
+  ArrowRight, Star,
   Mountain, Trees, Waves
 } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -232,7 +232,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <h3 className="text-xl font-bold mb-3" style={{ color: "var(--t-stone-800)" }}>{step.title}</h3>
-              <p className="text-sm leading-relaxed max-w-[240px]" style={{ color: "var(--t-stone-500)" }}>{step.description}</p>
+              <p className="text-sm leading-relaxed max-w-60" style={{ color: "var(--t-stone-500)" }}>{step.description}</p>
             </div>
           ))}
         </div>
@@ -259,13 +259,13 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {destinations.map((dest) => (
-              <div key={dest.name} className="group relative overflow-hidden rounded-3xl cursor-pointer shadow-lg hover:shadow-2xl transition-all h-[450px]">
+              <div key={dest.name} className="group relative overflow-hidden rounded-3xl cursor-pointer shadow-lg hover:shadow-2xl transition-all h-112.5">
                 <img
                   src={dest.image}
                   alt={dest.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
                 <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/30">
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
@@ -333,8 +333,8 @@ export default function LandingPage() {
           </div>
 
           {/* Animated glow elements */}
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-400/20 blur-[130px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-amber-400/30 transition-colors duration-1000" />
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-forest-400/20 blur-[130px] rounded-full translate-y-1/2 -translate-x-1/2 group-hover:bg-forest-400/30 transition-colors duration-1000" />
+          <div className="absolute top-0 right-0 w-125 h-125 bg-amber-400/20 blur-[130px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-amber-400/30 transition-colors duration-1000" />
+          <div className="absolute bottom-0 left-0 w-125 h-125 bg-forest-400/20 blur-[130px] rounded-full translate-y-1/2 -translate-x-1/2 group-hover:bg-forest-400/30 transition-colors duration-1000" />
 
           <div className="relative z-10 glass-container p-4 md:p-8 rounded-[30px] border border-white/10">
             <h2 className="text-4xl md:text-7xl font-bold text-white mb-8 tracking-tight">
@@ -389,7 +389,7 @@ export default function LandingPage() {
             <div className="flex gap-8 text-sm font-medium" style={{ color: "var(--t-stone-600)" }}>
               <Link to="/explore" className="hover:text-forest-600 transition-colors">Explore</Link>
               <Link to="/login" className="hover:text-forest-600 transition-colors">Sign In</Link>
-              <a href="#" className="hover:text-forest-600 transition-colors">Privacy</a>
+              <Link to="/privacy" className="hover:text-forest-600 transition-colors">Privacy</Link>
               <a href="#" className="hover:text-forest-600 transition-colors">Terms</a>
             </div>
           </div>

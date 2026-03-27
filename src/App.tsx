@@ -7,6 +7,7 @@ import ExplorePage from "@/pages/explore-page";
 import ResultsPage from "@/pages/results-page";
 import LoginPage from "@/pages/login-page";
 import ProfilePage from "@/pages/profile-page";
+import PrivacyPolicy from "@/pages/privacy-policy";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ function App() {
             <Route path="/results" element={<ResultsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

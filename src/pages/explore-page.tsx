@@ -31,6 +31,7 @@ import type {
   RouteOption,
   GeocodeResult,
   PlaceRecommendation,
+  AggregatedResponse,
 } from "@/types";
 import {
   MapPin, Clock, Wallet, Users, Search, Loader2,
@@ -86,7 +87,7 @@ export default function ExplorePage() {
   useEffect(() => {
     if (location) {
       geocodeReverse.mutate(location, {
-        onSuccess: (result) => {
+        onSuccess: (result: { data: { cityName: string } }) => {
           setResolvedCity(result.data.cityName);
         },
       });
@@ -128,9 +129,9 @@ export default function ExplorePage() {
 
   const handleFindRoutes = useCallback(() => {
     if (!effectiveLocation || !placesMutation.data) return;
-    const places = placesMutation.data.data.filter((p) => selectedPlaces.has(p.name));
+    const places = placesMutation.data.data.filter((p: PlaceRecommendation) => selectedPlaces.has(p.name));
     routesMutation.mutate(
-      { origin: effectiveLocation, selectedPlaces: places.map((p) => ({ name: p.name, location: p.location })) },
+      { origin: effectiveLocation, selectedPlaces: places.map((p: PlaceRecommendation) => ({ name: p.name, location: p.location })) },
       {
         onSuccess: (result: { data: Record<string, RouteOption[]> }) => {
           const autoSelected: Record<string, string> = {};
@@ -147,12 +148,12 @@ export default function ExplorePage() {
 
   const handleAggregate = useCallback(() => {
     if (!savedRequest || !placesMutation.data || !routesMutation.data) return;
-    const places = placesMutation.data.data.filter((p) => selectedPlaces.has(p.name));
+    const places = placesMutation.data.data.filter((p: PlaceRecommendation) => selectedPlaces.has(p.name));
     const filteredRoutes: Record<string, RouteOption[]> = {};
     for (const [placeName, routes] of Object.entries(routesMutation.data.data)) {
       const mode = selectedRoutes[placeName];
       if (mode) {
-        const selected = routes.find((r) => r.mode === mode);
+        const selected = routes.find((r: RouteOption) => r.mode === mode);
         filteredRoutes[placeName] = selected ? [selected] : routes;
       } else {
         filteredRoutes[placeName] = routes;
@@ -449,7 +450,7 @@ export default function ExplorePage() {
             </div>
 
             <div className="space-y-3">
-              {placesMutation.data.data.map((place, idx) => {
+              {placesMutation.data.data.map((place: PlaceRecommendation, idx: number) => {
                 const isSelected = selectedPlaces.has(place.name);
                 const isAgentPick = idx < 5;
                 return (
@@ -525,7 +526,7 @@ export default function ExplorePage() {
               </p>
             </div>
 
-            {Object.entries(routesMutation.data.data).map(([placeName, routes]) => (
+            {(Object.entries(routesMutation.data.data) as [string, RouteOption[]][]).map(([placeName, routes]) => (
               <div key={placeName} className="t-card p-5">
                 <h4 className="font-semibold mb-3 flex items-center gap-2" style={{ color: "var(--t-stone-800)" }}>
                   <MapPin className="w-4 h-4" style={{ color: "var(--t-forest-500)" }} /> {placeName}
@@ -581,7 +582,7 @@ export default function ExplorePage() {
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Button>
               <Button
-                className="flex-[2] t-btn-primary"
+                className="flex-2 t-btn-primary"
                 onClick={handleAggregate}
                 disabled={aggregateMutation.isPending}
               >
