@@ -42,13 +42,13 @@ export default function ResultsPage() {
   const { itinerary, places } = result;
 
   const mapMarkers = viewMode === "itinerary"
-    ? itinerary.itinerary.map((item) => ({
+    ? itinerary.itinerary.map((item: any) => ({
       lat: item.place.location.lat,
       lng: item.place.location.lng,
       name: item.place.name,
       order: item.order,
     }))
-    : places.map((p, i) => ({
+    : places.map((p: any, i: number) => ({
       lat: p.location.lat,
       lng: p.location.lng,
       name: p.name,
@@ -138,7 +138,7 @@ export default function ResultsPage() {
                   <Wallet className="w-4 h-4" style={{ color: "var(--t-amber-500)" }} /> Budget Breakdown
                 </h3>
                 <div className="space-y-2">
-                  {itinerary.budgetBreakdown.map((item) => (
+                  {itinerary.budgetBreakdown.map((item: any) => (
                     <div key={item.category} className="flex justify-between items-center">
                       <span className="text-sm" style={{ color: "var(--t-stone-500)" }}>{item.category}</span>
                       <span className="text-sm font-medium" style={{ color: "var(--t-stone-700)" }}>{item.amount.toLocaleString()}</span>

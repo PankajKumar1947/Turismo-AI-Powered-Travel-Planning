@@ -1,5 +1,5 @@
-import type { GeocodeResult } from "@/types";
-import { apiClient } from "@/services/api";
+import type { GeocodeResult } from "../types";
+import { apiClient } from "../services/api";
 
 export const geocodeQueries = {
   forward: {

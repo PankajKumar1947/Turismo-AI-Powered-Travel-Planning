@@ -1,5 +1,5 @@
-import type { PlaceRecommendation, RecommendRequest, RouteOption, AggregatedResponse } from "@/types";
-import { apiClient } from "@/services/api";
+import type { PlaceRecommendation, RecommendRequest, RouteOption, AggregatedResponse } from "../types";
+import { apiClient } from "../services/api";
 
 export const recommendQueries = {
   getPlaces: {

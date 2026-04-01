@@ -1,5 +1,5 @@
-import { apiClient } from "@/services/api";
-import type { AuthResponse, AuthUser, SavedItinerary } from "@/types";
+import { apiClient } from "../services/api";
+import type { AuthResponse, AuthUser, SavedItinerary } from "../types";
 
 export const authQueries = {
   register: {
