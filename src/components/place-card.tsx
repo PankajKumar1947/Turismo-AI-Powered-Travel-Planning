@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import type { PlaceRecommendation } from "@/types";
+import type { PlaceRecommendation } from "@/interfaces/recommend.interface";
 import { Star, Clock, Wallet, Sparkles, Tag } from "lucide-react";
 
 interface PlaceCardProps {

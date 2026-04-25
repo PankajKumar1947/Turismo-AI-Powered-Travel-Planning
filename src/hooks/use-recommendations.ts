@@ -1,18 +1,25 @@
 import { useMutation } from "@tanstack/react-query";
-import {
-  fetchPlaces,
-  fetchRoutes,
-  fetchAggregate,
-  recommendQueries,
-  type FetchRoutesInput,
-  type AggregateInput,
-} from "@/react-query/recommend.queries";
-import { fetchGeocodeForward, fetchGeocodeReverse, geocodeQueries } from "@/react-query/geocode.queries";
-import type { PlaceRecommendation, RecommendRequest, RouteOption, AggregatedResponse, GeocodeResult } from "@/types";
+import { recommendQueries } from "@/react-query/recommend.queries";
+import { geocodeQueries } from "@/react-query/geocode.queries";
+import { 
+  getPlaces, 
+  getRoutes, 
+  aggregate 
+} from "@/routes/recommend.route";
+import { 
+  forward, 
+  reverse 
+} from "@/routes/geocode.route";
+import type { 
+  PlaceRecommendation, 
+  RecommendRequest, 
+  RouteOption, 
+  AggregatedResponse, 
+  FetchRoutesRequest,
+  AggregateRequest
+} from "@/interfaces/recommend.interface";
+import type { GeocodeResult } from "@/interfaces/geocode.interface";
 
-/**
- * Step 1: Find places via Agent-1
- */
 export function useFindPlaces() {
   return useMutation<
     { success: boolean; data: PlaceRecommendation[] },
@@ -20,41 +27,32 @@ export function useFindPlaces() {
     RecommendRequest
   >({
     mutationKey: recommendQueries.getPlaces.key,
-    mutationFn: fetchPlaces,
+    mutationFn: getPlaces,
   });
 }
 
-/**
- * Step 2: Find routes via Agent-2
- */
 export function useFindRoutes() {
   return useMutation<
     { success: boolean; data: Record<string, RouteOption[]> },
     Error,
-    FetchRoutesInput
+    FetchRoutesRequest
   >({
     mutationKey: recommendQueries.getRoutes.key,
-    mutationFn: fetchRoutes,
+    mutationFn: getRoutes,
   });
 }
 
-/**
- * Step 3: Aggregate itinerary via Agent-3
- */
 export function useAggregate() {
   return useMutation<
     { success: boolean; data: AggregatedResponse },
     Error,
-    AggregateInput
+    AggregateRequest
   >({
     mutationKey: recommendQueries.aggregate.key,
-    mutationFn: fetchAggregate,
+    mutationFn: aggregate,
   });
 }
 
-/**
- * Geocode city name → coordinates
- */
 export function useGeocodeForward() {
   return useMutation<
     { success: boolean; data: GeocodeResult },
@@ -62,12 +60,9 @@ export function useGeocodeForward() {
     string
   >({
     mutationKey: geocodeQueries.forward.key,
-    mutationFn: fetchGeocodeForward,
+    mutationFn: forward,
   });
 }
-/**
- * Reverse geocode coordinates → city name
- */
 export function useGeocodeReverse() {
   return useMutation<
     { success: boolean; data: { cityName: string } },
@@ -75,6 +70,6 @@ export function useGeocodeReverse() {
     { lat: number; lng: number }
   >({
     mutationKey: geocodeQueries.reverse.key,
-    mutationFn: ({ lat, lng }) => fetchGeocodeReverse(lat, lng),
+    mutationFn: ({ lat, lng }) => reverse(lat, lng),
   });
 }

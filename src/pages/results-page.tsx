@@ -4,7 +4,11 @@ import { Separator } from "@/components/ui/separator";
 import PlaceCard from "@/components/place-card";
 import ItineraryTimeline from "@/components/itinerary-timeline";
 import MapView from "@/components/map-view";
-import type { PlaceRecommendation, AggregatedResponse, RecommendRequest } from "@/types";
+import type { 
+  PlaceRecommendation, 
+  AggregatedResponse, 
+  RecommendRequest 
+} from "@/interfaces/recommend.interface";
 import {
   Clock, Wallet, MapPin, Lightbulb,
   List, Map as MapIcon,

@@ -1,15 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
-import {
-  fetchMyItineraries,
-  deleteItinerary,
-  itineraryQueries,
-} from "@/react-query/auth.queries";
-import type { SavedItinerary } from "@/types";
+import { useMyItineraries, useDeleteItinerary } from "@/hooks/use-itineraries";
+import type { SavedItinerary } from "@/interfaces/itinerary.interface";
 import {
   Mail, Calendar, MapPin, Clock, Wallet,
   Trash2, ChevronRight, Loader2, Leaf, History,
@@ -18,7 +13,6 @@ import {
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const queryClient = useQueryClient();
 
   // Redirect if not auth
   useEffect(() => {
@@ -30,18 +24,9 @@ export default function ProfilePage() {
   const {
     data: itinerariesRes,
     isLoading: itinLoading,
-  } = useQuery({
-    queryKey: itineraryQueries.list.key,
-    queryFn: fetchMyItineraries,
-    enabled: isAuthenticated,
-  });
+  } = useMyItineraries(user?.id);
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteItinerary,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: itineraryQueries.list.key });
-    },
-  });
+  const deleteItin = useDeleteItinerary();
 
   const itineraries = itinerariesRes?.data || [];
 
@@ -158,8 +143,8 @@ export default function ProfilePage() {
                     },
                   })
                 }
-                onDelete={() => deleteMutation.mutate(it._id)}
-                isDeleting={deleteMutation.isPending}
+                onDelete={() => deleteItin.mutate(it._id)}
+                isDeleting={deleteItin.isPending}
               />
             ))}
           </div>

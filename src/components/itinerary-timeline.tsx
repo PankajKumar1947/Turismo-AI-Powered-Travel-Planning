@@ -1,7 +1,7 @@
 import PlaceCard from "@/components/place-card";
 import RouteInfo from "@/components/route-info";
 import { Clock } from "lucide-react";
-import type { ItineraryItem } from "@/types";
+import type { ItineraryItem } from "@/interfaces/recommend.interface";
 
 interface ItineraryTimelineProps {
   items: ItineraryItem[];

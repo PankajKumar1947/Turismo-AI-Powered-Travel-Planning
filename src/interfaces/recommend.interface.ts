@@ -1,5 +1,3 @@
-// ── Place types ──
-
 export interface PlaceLocation {
   lat: number;
   lng: number;
@@ -21,8 +19,6 @@ export interface PlaceRecommendation {
   imageSearchQuery?: string;
 }
 
-// ── Route types ──
-
 export interface RouteOption {
   mode: string;
   duration: number;
@@ -32,8 +28,6 @@ export interface RouteOption {
   localTip?: string;
   recommended: boolean;
 }
-
-// ── Itinerary types ──
 
 export interface ItineraryItem {
   order: number;
@@ -57,8 +51,6 @@ export interface AggregatedResponse {
   tips: string[];
 }
 
-// ── Request types ──
-
 export type GroupType = "solo" | "couple" | "family" | "friends";
 
 export interface RecommendRequest {
@@ -71,51 +63,28 @@ export interface RecommendRequest {
   preferences?: string[];
 }
 
-// ── API Response ──
-
-export interface RecommendResponse {
-  success: boolean;
-  data: {
-    places: PlaceRecommendation[];
-    itinerary: AggregatedResponse;
-  };
+export interface FetchRoutesRequest {
+  origin: { lat: number; lng: number };
+  selectedPlaces: { name: string; location: { lat: number; lng: number } }[];
 }
 
-export interface GeocodeResult {
-  lat: number;
-  lng: number;
-  displayName: string;
-}
-
-// ── Auth types ──
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  preferences: {
-    categories: string[];
-    budgetRange: string;
-  };
-  createdAt: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  data: {
-    token: string;
-    user: AuthUser;
-  };
-}
-
-// ── Saved Itinerary types ──
-
-export interface SavedItinerary {
-  _id: string;
-  userId: string;
-  city: string;
-  itinerary: AggregatedResponse;
-  request: RecommendRequest;
+export interface AggregateRequest {
   places: PlaceRecommendation[];
-  createdAt: string;
+  routes: Record<string, RouteOption[]>;
+  request: RecommendRequest;
+}
+
+export interface PlacesResponse {
+  success: boolean;
+  data: PlaceRecommendation[];
+}
+
+export interface RoutesResponse {
+  success: boolean;
+  data: Record<string, RouteOption[]>;
+}
+
+export interface AggregateResponseData {
+  success: boolean;
+  data: AggregatedResponse;
 }

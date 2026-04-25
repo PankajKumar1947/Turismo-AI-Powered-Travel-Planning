@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { PlaceLocation } from "@/types";
+import type { PlaceLocation } from "@/interfaces/recommend.interface";
 
 interface MapMarker {
   lat: number;

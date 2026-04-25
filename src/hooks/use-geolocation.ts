@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { PlaceLocation } from "@/types";
+import type { PlaceLocation } from "@/interfaces/recommend.interface";
 
 interface GeolocationState {
   location: PlaceLocation | null;

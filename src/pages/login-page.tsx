@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
-import { fetchLogin, fetchRegister } from "@/react-query/auth.queries";
+import { useAuth, useLogin, useRegister } from "@/hooks/use-auth";
 import { Leaf, Mail, Lock, User, Loader2, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
@@ -18,31 +16,29 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const loginMutation = useMutation({
-    mutationFn: fetchLogin,
-    onSuccess: (res) => {
-      login(res.data.token, res.data.user);
-      navigate("/explore");
-    },
-  });
+  const loginTask = useLogin();
 
-  const registerMutation = useMutation({
-    mutationFn: fetchRegister,
-    onSuccess: (res) => {
-      login(res.data.token, res.data.user);
-      navigate("/explore");
-    },
-  });
+  const registerTask = useRegister();
 
-  const isLoading = loginMutation.isPending || registerMutation.isPending;
-  const error = loginMutation.error?.message || registerMutation.error?.message;
+  const isLoading = loginTask.isPending || registerTask.isPending;
+  const error = loginTask.error?.message || registerTask.error?.message;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "login") {
-      loginMutation.mutate({ email, password });
+      loginTask.mutate({ email, password }, {
+        onSuccess: (res) => {
+          login(res.data.token, res.data.user);
+          navigate("/explore");
+        },
+      });
     } else {
-      registerMutation.mutate({ name, email, password });
+      registerTask.mutate({ name, email, password }, {
+        onSuccess: (res) => {
+          login(res.data.token, res.data.user);
+          navigate("/explore");
+        },
+      });
     }
   };
 
@@ -163,8 +159,8 @@ export default function LoginPage() {
               <button
                 onClick={() => {
                   setMode(mode === "login" ? "register" : "login");
-                  loginMutation.reset();
-                  registerMutation.reset();
+                  loginTask.reset();
+                  registerTask.reset();
                 }}
                 className="text-sm transition-colors"
                 style={{ color: "var(--t-forest-600)" }}

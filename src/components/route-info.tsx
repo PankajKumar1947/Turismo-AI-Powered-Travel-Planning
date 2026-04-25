@@ -1,4 +1,4 @@
-import type { RouteOption } from "@/types";
+import type { RouteOption } from "@/interfaces/recommend.interface";
 import { Badge } from "@/components/ui/badge";
 import {
   Footprints, Car, Bike, TrainFront, Bus, Navigation, Info, Ship, Truck,

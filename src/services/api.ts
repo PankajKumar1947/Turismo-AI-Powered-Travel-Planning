@@ -1,58 +1,40 @@
+import axios from "axios";
+
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-function getToken(): string | null {
-  return localStorage.getItem("turismo_token");
-}
-
-async function request<T>(
-  endpoint: string,
-  options?: RequestInit
-): Promise<T> {
-  const token = getToken();
-  const headers: Record<string, string> = {
+export const axiosInstance = axios.create({
+  baseURL: API_BASE,
+  headers: {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+  },
+});
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers,
-    ...options,
-  });
+// Request interceptor to add auth token
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("turismo_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-
-    // Auto-logout on 401
-    if (response.status === 401) {
+// Response interceptor to handle errors
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401) {
       localStorage.removeItem("turismo_token");
       localStorage.removeItem("turismo_user");
+      // Optional: redirect to login or reload
     }
 
-    throw new Error(
-      error.message || error.error || `Request failed: ${response.status}`
-    );
+    const message = error.response?.data?.message || error.response?.data?.error || error.message || "Request failed";
+    return Promise.reject(new Error(message));
   }
-
-  return response.json();
-}
-
-// ── Reusable API client ──
-
-export const apiClient = {
-  get: <T>(endpoint: string) => request<T>(endpoint),
-
-  post: <T>(endpoint: string, body: unknown) =>
-    request<T>(endpoint, {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
-
-  put: <T>(endpoint: string, body: unknown) =>
-    request<T>(endpoint, {
-      method: "PUT",
-      body: JSON.stringify(body),
-    }),
-
-  delete: <T>(endpoint: string) =>
-    request<T>(endpoint, { method: "DELETE" }),
-};
+);

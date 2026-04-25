@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/hooks/use-auth";
+import { AuthProvider } from "@/context/auth-context";
 import Navbar from "@/components/navbar";
 import LandingPage from "@/pages/landing-page";
 import ExplorePage from "@/pages/explore-page";

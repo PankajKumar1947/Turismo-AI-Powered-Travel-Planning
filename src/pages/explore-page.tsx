@@ -21,7 +21,7 @@ import {
   useGeocodeForward,
   useGeocodeReverse,
 } from "@/hooks/use-recommendations";
-import { saveItinerary } from "@/react-query/auth.queries";
+import { useSaveItinerary } from "@/hooks/use-itineraries";
 import { useEffect } from "react";
 import PlaceCard from "@/components/place-card";
 import RouteInfo from "@/components/route-info";
@@ -29,10 +29,10 @@ import type {
   GroupType,
   RecommendRequest,
   RouteOption,
-  GeocodeResult,
   PlaceRecommendation,
   AggregatedResponse,
-} from "@/types";
+} from "@/interfaces/recommend.interface";
+import type { GeocodeResult } from "@/interfaces/geocode.interface";
 import {
   MapPin, Clock, Wallet, Users, Search, Loader2,
   Navigation, ArrowLeft, ArrowRight, Sparkles,
@@ -74,11 +74,12 @@ export default function ExplorePage() {
   const [selectedRoutes, setSelectedRoutes] = useState<Record<string, string>>({});
   const [savedRequest, setSavedRequest] = useState<RecommendRequest | null>(null);
 
-  const placesMutation = useFindPlaces();
-  const routesMutation = useFindRoutes();
-  const aggregateMutation = useAggregate();
-  const geocodeMutation = useGeocodeForward();
-  const geocodeReverse = useGeocodeReverse();
+  const placesOp = useFindPlaces();
+  const routesOp = useFindRoutes();
+  const aggregateOp = useAggregate();
+  const geocodeOp = useGeocodeForward();
+  const geocodeReverseOp = useGeocodeReverse();
+  const saveItinOp = useSaveItinerary();
 
   const effectiveLocation = location || manualLocation;
   const stepIndex = step === "input" ? 0 : step === "places" ? 1 : 2;
@@ -86,17 +87,17 @@ export default function ExplorePage() {
   // Auto-resolve city name when current location is fetched
   useEffect(() => {
     if (location) {
-      geocodeReverse.mutate(location, {
+      geocodeReverseOp.mutate(location, {
         onSuccess: (result: { data: { cityName: string } }) => {
           setResolvedCity(result.data.cityName);
         },
       });
     }
-  }, [location, geocodeReverse.mutate]);
+  }, [location, geocodeReverseOp.mutate]);
 
   const handleCitySearch = useCallback(() => {
     if (!cityQuery.trim()) return;
-    geocodeMutation.mutate(cityQuery, {
+    geocodeOp.mutate(cityQuery, {
       onSuccess: (result: { data: GeocodeResult }) => {
         if (result.data) {
           setManualLocation({ lat: result.data.lat, lng: result.data.lng });
@@ -104,7 +105,7 @@ export default function ExplorePage() {
         }
       },
     });
-  }, [cityQuery, geocodeMutation]);
+  }, [cityQuery, geocodeOp]);
 
   const handleFindPlaces = useCallback(() => {
     if (!effectiveLocation || !budget) return;
@@ -118,19 +119,19 @@ export default function ExplorePage() {
       preferences: selectedCategories.length > 0 ? selectedCategories : undefined,
     };
     setSavedRequest(request);
-    placesMutation.mutate(request, {
+    placesOp.mutate(request, {
       onSuccess: (result: { data: PlaceRecommendation[] }) => {
         const recommended = new Set(result.data.slice(0, 5).map((p: PlaceRecommendation) => p.name));
         setSelectedPlaces(recommended);
         setStep("places");
       },
     });
-  }, [effectiveLocation, budget, resolvedCity, time, groupType, groupSize, selectedCategories, placesMutation]);
+  }, [effectiveLocation, budget, resolvedCity, time, groupType, groupSize, selectedCategories, placesOp]);
 
   const handleFindRoutes = useCallback(() => {
-    if (!effectiveLocation || !placesMutation.data) return;
-    const places = placesMutation.data.data.filter((p: PlaceRecommendation) => selectedPlaces.has(p.name));
-    routesMutation.mutate(
+    if (!effectiveLocation || !placesOp.data) return;
+    const places = placesOp.data.data.filter((p: PlaceRecommendation) => selectedPlaces.has(p.name));
+    routesOp.mutate(
       { origin: effectiveLocation, selectedPlaces: places.map((p: PlaceRecommendation) => ({ name: p.name, location: p.location })) },
       {
         onSuccess: (result: { data: Record<string, RouteOption[]> }) => {
@@ -144,13 +145,13 @@ export default function ExplorePage() {
         },
       }
     );
-  }, [effectiveLocation, placesMutation.data, selectedPlaces, routesMutation]);
+  }, [effectiveLocation, placesOp.data, selectedPlaces, routesOp]);
 
   const handleAggregate = useCallback(() => {
-    if (!savedRequest || !placesMutation.data || !routesMutation.data) return;
-    const places = placesMutation.data.data.filter((p: PlaceRecommendation) => selectedPlaces.has(p.name));
+    if (!savedRequest || !placesOp.data || !routesOp.data) return;
+    const places = placesOp.data.data.filter((p: PlaceRecommendation) => selectedPlaces.has(p.name));
     const filteredRoutes: Record<string, RouteOption[]> = {};
-    for (const [placeName, routes] of Object.entries(routesMutation.data.data)) {
+    for (const [placeName, routes] of Object.entries(routesOp.data.data)) {
       const mode = selectedRoutes[placeName];
       if (mode) {
         const selected = routes.find((r: RouteOption) => r.mode === mode);
@@ -159,24 +160,24 @@ export default function ExplorePage() {
         filteredRoutes[placeName] = routes;
       }
     }
-    aggregateMutation.mutate(
+    aggregateOp.mutate(
       { places, routes: filteredRoutes, request: savedRequest },
       {
         onSuccess: (result: { data: AggregatedResponse }) => {
           // Auto-save if authenticated
           if (isAuthenticated) {
-            saveItinerary({
+            saveItinOp.mutate({
               city: savedRequest.cityName || "Unknown City",
               itinerary: result.data,
               request: savedRequest,
               places,
-            }).catch(console.error);
+            });
           }
           navigate("/results", { state: { result: { places, itinerary: result.data }, request: savedRequest } });
         },
       }
     );
-  }, [savedRequest, placesMutation.data, routesMutation.data, selectedPlaces, selectedRoutes, aggregateMutation, navigate, isAuthenticated]);
+  }, [savedRequest, placesOp.data, routesOp.data, selectedPlaces, selectedRoutes, aggregateOp, navigate, isAuthenticated, saveItinOp]);
 
   const togglePlace = (name: string) => {
     setSelectedPlaces((prev) => {
@@ -202,16 +203,16 @@ export default function ExplorePage() {
     setStep("input");
     setSelectedPlaces(new Set());
     setSelectedRoutes({});
-    placesMutation.reset();
-    routesMutation.reset();
-    aggregateMutation.reset();
+    placesOp.reset();
+    routesOp.reset();
+    aggregateOp.reset();
   };
 
   const currentError =
-    placesMutation.error?.message || routesMutation.error?.message ||
-    aggregateMutation.error?.message || geocodeMutation.error?.message || "";
+    placesOp.error?.message || routesOp.error?.message ||
+    aggregateOp.error?.message || geocodeOp.error?.message || "";
 
-  const isLoading = placesMutation.isPending || routesMutation.isPending || aggregateMutation.isPending;
+  const isLoading = placesOp.isPending || routesOp.isPending || aggregateOp.isPending;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--t-bg)" }}>
@@ -271,8 +272,8 @@ export default function ExplorePage() {
                         onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleCitySearch()}
                         className="flex-1"
                       />
-                      <Button variant="secondary" onClick={handleCitySearch} disabled={geocodeMutation.isPending}>
-                        {geocodeMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                      <Button variant="secondary" onClick={handleCitySearch} disabled={geocodeOp.isPending}>
+                        {geocodeOp.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                       </Button>
                     </div>
                     <div className="flex items-center gap-3">
@@ -288,7 +289,7 @@ export default function ExplorePage() {
                       <div className="p-3 rounded-xl bg-forest-50/50 border border-forest-100 space-y-1" style={{ color: "var(--t-forest-700)" }}>
                         <div className="flex items-center gap-2 text-sm font-bold">
                           <MapPin className="w-4 h-4 text-forest-500" />
-                          {geocodeReverse.isPending ? (
+                          {geocodeReverseOp.isPending ? (
                             <span className="flex items-center gap-2 italic font-normal opacity-60">
                               <Loader2 className="w-3 h-3 animate-spin" /> Resolving location...
                             </span>
@@ -421,10 +422,10 @@ export default function ExplorePage() {
                 size="lg"
                 className="w-full text-xl py-8 rounded-2xl t-btn-primary shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50"
                 onClick={handleFindPlaces}
-                disabled={placesMutation.isPending || !effectiveLocation || !budget}
+                disabled={placesOp.isPending || !effectiveLocation || !budget}
               >
-                {placesMutation.isPending ? (
-                  <><Loader2 className="w-6 h-6 mr-2 animate-spin" /> Agent-1 is discovering places...</>
+                {placesOp.isPending ? (
+                  <><Loader2 className="w-6 h-6 mr-2 animate-spin" /> Discovery Specialist Agent is finding places...</>
                 ) : (
                   <><Leaf className="w-6 h-6 mr-3" /> Start Discovery <ArrowRight className="w-6 h-6 ml-3" /></>
                 )}
@@ -435,14 +436,14 @@ export default function ExplorePage() {
 
 
         {/* ═══ STEP 2: Select Places ═══ */}
-        {step === "places" && placesMutation.data && (
+        {step === "places" && placesOp.data && (
           <div className="space-y-5 animate-in fade-in duration-300">
             <div className="text-center mb-4">
               <div className="t-badge-nature inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium mb-3">
-                <Leaf className="w-3.5 h-3.5" /> Agent-1 Response
+                <Leaf className="w-3.5 h-3.5" /> Discovery Specialist Agent
               </div>
               <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--t-stone-800)" }}>
-                {placesMutation.data.data.length} Places Found
+                {placesOp.data.data.length} Places Found
               </h2>
               <p style={{ color: "var(--t-stone-500)" }}>
                 Top 5 are pre-selected (agent's pick). Select the ones you'd like to visit.
@@ -450,7 +451,7 @@ export default function ExplorePage() {
             </div>
 
             <div className="space-y-3">
-              {placesMutation.data.data.map((place: PlaceRecommendation, idx: number) => {
+              {placesOp.data.data.map((place: PlaceRecommendation, idx: number) => {
                 const isSelected = selectedPlaces.has(place.name);
                 const isAgentPick = idx < 5;
                 return (
@@ -499,9 +500,9 @@ export default function ExplorePage() {
               <Button
                 className="flex-[2] t-btn-primary"
                 onClick={handleFindRoutes}
-                disabled={routesMutation.isPending || selectedPlaces.size === 0}
+                disabled={routesOp.isPending || selectedPlaces.size === 0}
               >
-                {routesMutation.isPending ? (
+                {routesOp.isPending ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Finding routes...</>
                 ) : (
                   <>Find Routes ({selectedPlaces.size}) <ArrowRight className="w-4 h-4 ml-2" /></>
@@ -512,11 +513,11 @@ export default function ExplorePage() {
         )}
 
         {/* ═══ STEP 3: Select Routes ═══ */}
-        {step === "routes" && routesMutation.data && (
+        {step === "routes" && routesOp.data && (
           <div className="space-y-5 animate-in fade-in duration-300">
             <div className="text-center mb-4">
               <div className="t-badge-info inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium mb-3">
-                <Navigation className="w-3.5 h-3.5" /> Agent-2 Response
+                <Navigation className="w-3.5 h-3.5" /> Logistics Expert Agent
               </div>
               <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--t-stone-800)" }}>
                 Route Options
@@ -526,7 +527,7 @@ export default function ExplorePage() {
               </p>
             </div>
 
-            {(Object.entries(routesMutation.data.data) as [string, RouteOption[]][]).map(([placeName, routes]) => (
+            {(Object.entries(routesOp.data.data) as [string, RouteOption[]][]).map(([placeName, routes]) => (
               <div key={placeName} className="t-card p-5">
                 <h4 className="font-semibold mb-3 flex items-center gap-2" style={{ color: "var(--t-stone-800)" }}>
                   <MapPin className="w-4 h-4" style={{ color: "var(--t-forest-500)" }} /> {placeName}
@@ -584,9 +585,9 @@ export default function ExplorePage() {
               <Button
                 className="flex-2 t-btn-primary"
                 onClick={handleAggregate}
-                disabled={aggregateMutation.isPending}
+                disabled={aggregateOp.isPending}
               >
-                {aggregateMutation.isPending ? (
+                {aggregateOp.isPending ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building itinerary...</>
                 ) : (
                   <>Build My Itinerary <ArrowRight className="w-4 h-4 ml-2" /></>
@@ -605,9 +606,9 @@ export default function ExplorePage() {
               <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: "var(--t-sky-500)", animationDelay: "0.3s" }} />
             </div>
             <p className="text-sm" style={{ color: "var(--t-stone-500)" }}>
-              {placesMutation.isPending && "Agent-1 is discovering the best places..."}
-              {routesMutation.isPending && "Agent-2 is calculating optimal routes..."}
-              {aggregateMutation.isPending && "Agent-3 is crafting your perfect itinerary..."}
+              {placesOp.isPending && "Discovery Specialist Agent is finding the best spots..."}
+              {routesOp.isPending && "Logistics Expert Agent is mapping optimal routes..."}
+              {aggregateOp.isPending && "Itinerary Curator Agent is finalizing your plan..."}
             </p>
           </div>
         )}
