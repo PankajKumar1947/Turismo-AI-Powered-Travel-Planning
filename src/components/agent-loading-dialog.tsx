@@ -9,15 +9,15 @@ import { Loader2, Sparkles, Navigation, ListChecks } from "lucide-react";
 
 interface AgentLoadingDialogProps {
   isOpen: boolean;
-  agentName: "Discovery Specialist" | "Logistics Expert" | "Aggregator";
+  agentName: "Place Finder Agent" | "Route Finder Agent" | "Aggregator Agent";
 }
 
 const agentConfig = {
-  "Discovery Specialist": {
+  "Place Finder Agent": {
     icon: <Sparkles className="w-8 h-8 text-amber-500" />,
     color: "var(--t-amber-500)",
     messages: [
-      "Initializing Discovery Specialist Agent...",
+      "Initializing Place Finder Agent...",
       "Connecting to global tourism databases...",
       "Scanning local landmarks and hidden gems...",
       "Filtering results based on your preferences...",
@@ -29,11 +29,11 @@ const agentConfig = {
       "Verifying GPS coordinates and operational hours...",
     ],
   },
-  "Logistics Expert": {
+  "Route Finder Agent": {
     icon: <Navigation className="w-8 h-8 text-sky-500" />,
     color: "var(--t-sky-500)",
     messages: [
-      "Initializing Logistics Expert Agent...",
+      "Initializing Route Finder Agent...",
       "Retrieving coordinate data for selected spots...",
       "Calculating travel times between all stop combinations...",
       "Optimizing routes for multiple transport modes...",
@@ -45,7 +45,7 @@ const agentConfig = {
       "Reviewing route safety and accessibility...",
     ],
   },
-  "Aggregator": {
+  "Aggregator Agent": {
     icon: <ListChecks className="w-8 h-8 text-forest-500" />,
     color: "var(--t-forest-500)",
     messages: [
@@ -117,7 +117,7 @@ export function AgentLoadingDialog({ isOpen, agentName }: AgentLoadingDialogProp
             <div className="w-full space-y-4">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-center" style={{ color: "var(--t-stone-800)" }}>
-                  {agentName} Agent <span className="font-normal text-stone-400">at work</span>
+                  {agentName} <span className="font-normal text-stone-400">at work</span>
                 </DialogTitle>
               </DialogHeader>
               

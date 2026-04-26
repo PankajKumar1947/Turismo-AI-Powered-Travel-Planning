@@ -18,7 +18,7 @@ import { AgentLoadingDialog } from "@/components/agent-loading-dialog";
 export default function RoutesPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { 
+  const {
     places, selectedPlaces,
     routes,
     selectedRoutes, setSelectedRoutes,
@@ -33,7 +33,7 @@ export default function RoutesPage() {
   const handleAggregate = useCallback(() => {
     if (!savedRequest || !places || !routes) return;
     const selected = places.filter((p) => selectedPlaces.includes(p.name));
-    
+
     const filteredRoutes: Record<string, RouteOption[]> = {};
     for (const [placeName, rts] of Object.entries(routes)) {
       const mode = selectedRoutes[placeName];
@@ -81,10 +81,10 @@ export default function RoutesPage() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
-      <AgentLoadingDialog isOpen={aggregateOp.isPending} agentName="Aggregator" />
+      <AgentLoadingDialog isOpen={aggregateOp.isPending} agentName="Aggregator Agent" />
       <div className="text-center mb-4">
         <div className="t-badge-info inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium mb-3">
-          <Navigation className="w-3.5 h-3.5" /> Logistics Expert Agent
+          <Navigation className="w-3.5 h-3.5" /> Route Finder Agent
         </div>
         <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--t-stone-800)" }}>
           Route Options
@@ -155,7 +155,7 @@ export default function RoutesPage() {
           disabled={aggregateOp.isPending}
         >
           {aggregateOp.isPending ? (
-            "Building itinerary..."
+            "Aggregator Agent is building itinerary..."
           ) : (
             <>Build My Itinerary <ArrowRight className="w-4 h-4 ml-2" /></>
           )}

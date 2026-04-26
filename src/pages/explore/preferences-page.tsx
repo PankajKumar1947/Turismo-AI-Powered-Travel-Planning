@@ -153,7 +153,7 @@ export default function PreferencesPage() {
 
   return (
     <>
-      <AgentLoadingDialog isOpen={placesOp.isPending} agentName="Discovery Specialist" />
+      <AgentLoadingDialog isOpen={placesOp.isPending} agentName="Place Finder Agent" />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 animate-in fade-in duration-300">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight" style={{ color: "var(--t-stone-800)" }}>
@@ -356,7 +356,7 @@ export default function PreferencesPage() {
             disabled={placesOp.isPending || !effectiveLocation}
           >
             {placesOp.isPending ? (
-              "Agent is finding places..."
+              "Place Finder Agent is finding places..."
             ) : (
               <><Leaf className="w-6 h-6 mr-3" /> Start Discovery <ArrowRight className="w-6 h-6 ml-3" /></>
             )}

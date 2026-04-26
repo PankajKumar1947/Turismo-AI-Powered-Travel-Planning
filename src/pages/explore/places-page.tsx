@@ -67,10 +67,10 @@ export default function PlacesPage() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
-      <AgentLoadingDialog isOpen={routesOp.isPending} agentName="Logistics Expert" />
+      <AgentLoadingDialog isOpen={routesOp.isPending} agentName="Route Finder Agent" />
       <div className="text-center mb-4">
         <div className="t-badge-nature inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium mb-3">
-          <Leaf className="w-3.5 h-3.5" /> Discovery Specialist Agent
+          <Leaf className="w-3.5 h-3.5" /> Place Finder Agent
         </div>
         <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--t-stone-800)" }}>
           {places.length} Places Found
@@ -133,7 +133,7 @@ export default function PlacesPage() {
           disabled={routesOp.isPending || selectedPlaces.length === 0}
         >
           {routesOp.isPending ? (
-            "Agent is finding routes..."
+            "Route Finder Agent is finding routes..."
           ) : (
             <>Find Routes ({selectedPlaces.length}) <ArrowRight className="w-4 h-4 ml-2" /></>
           )}

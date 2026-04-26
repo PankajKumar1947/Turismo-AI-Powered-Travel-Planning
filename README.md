@@ -4,7 +4,7 @@ Turismo is a next-generation travel planning application that leverages a multi-
 
 ## Key Features
 
-- **Multi-Agent AI Planning**: Utilizes specialized AI agents (Discovery Specialist, Logistics Expert, and Itinerary Curator) to research and organize your trip.
+- **Multi-Agent AI Planning**: Utilizes specialized AI agents (Place Finder Agent, Route Finder Agent, and Aggregator Agent) to research and organize your trip.
 - **Intelligent Recommendations**: Get tailored place suggestions based on your location, budget (INR), and travel group (Solo, Couple, Family, Friends).
 - **Logistics Optimization**: Real-time route calculation and transport mode recommendations for your selected destinations.
 - **Seamless User Experience**: A clean, modern UI featuring a multi-step wizard to guide you from initial preferences to a final, ready-to-use itinerary.
@@ -18,11 +18,11 @@ The following diagram illustrates the interaction between the user, the server, 
 ![Control Flow Diagram for Agent](./docs/agent-flow.png)
 
 1. User provides initial constraints (budget, distance, group type).
-2. Server orchestrates the request to Agent-1 (Place Finder).
+2. Server orchestrates the request to Agent-1 (Place Finder Agent).
 3. Agent-1 identifies optimal locations with ratings and costs.
 4. User selects preferred places from the recommendations.
-5. Server sends selected places to Agent-2 (Route Finder) to determine best travel modes.
-6. Agent-3 (Aggregator) synthesizes all data into a human-friendly itinerary.
+5. Server sends selected places to Agent-2 (Route Finder Agent) to determine best travel modes.
+6. Agent-3 (Aggregator Agent) synthesizes all data into a human-friendly itinerary.
 7. Structured JSON response is returned to the client for display.
 
 ## Technology Stack
@@ -57,7 +57,7 @@ The following diagram illustrates the interaction between the user, the server, 
 │   │   └── routes/        # API route definitions
 ├── server/                 # Node.js Backend
 │   ├── src/
-│   │   ├── agents/        # AI Agent logic (Discovery, Logistics, Curator)
+│   │   ├── agents/        # AI Agent logic (Place Finder, Route Finder, Aggregator)
 │   │   ├── modules/       # Domain-driven modules (Auth, Itinerary, etc.)
 │   │   │   └── auth/      # Each module contains its routes, controller, service, and model
 │   │   ├── middleware/    # Custom Express middleware
@@ -95,22 +95,22 @@ The following diagram illustrates the interaction between the user, the server, 
 
 The core of Turismo is its collaborative multi-agent architecture. Each agent has a specific domain of expertise, working sequentially to build your trip.
 
-### 1. Discovery Specialist
-The Discovery Specialist is the first point of contact for your travel needs. Its primary responsibility is to research and identify potential points of interest. 
+### 1. Place Finder Agent
+The Place Finder Agent is the first point of contact for your travel needs. Its primary responsibility is to research and identify potential points of interest. 
 - **Input Processing**: It analyzes your constraints such as total budget, group type (e.g., family vs. solo), and specific interest categories.
 - **Knowledge Retrieval**: Using Mistral AI, it scans for landmarks, hidden gems, and local favorites within your target area.
 - **Scoring System**: Every found place is scored (0-100) based on rating, cost efficiency, time requirement, and relevance to your specific group profile.
 - **Output**: A curated list of 7-10 places that best fit your profile.
 
-### 2. Logistics Expert
-Once potential places are identified, the Logistics Expert takes over to handle the practicalities of moving between them.
+### 2. Route Finder Agent
+Once potential places are identified, the Route Finder Agent takes over to handle the practicalities of moving between them.
 - **Routing Engine**: It interfaces with OSRM (Open Source Routing Machine) to calculate real-world distances and travel durations.
 - **Multi-Modal Support**: It evaluates different transport modes (walking, driving, cycling) based on the city's infrastructure and the distance between points.
 - **Contextual Tips**: It provides local advice for each leg of the journey, such as "Avoid this road during rush hour" or "The scenic walking path is highly recommended here."
 - **Output**: Detailed route options for every transition in your trip.
 
-### 3. Itinerary Curator
-The final agent, the Itinerary Curator, synthesizes the work of the previous agents into a polished, actionable plan.
+### 3. Aggregator Agent
+The final agent, the Aggregator Agent, synthesizes the work of the previous agents into a polished, actionable plan.
 - **Time Blocking**: It organizes your day into logical blocks, accounting for arrival/departure times, time spent at each attraction, and transition buffers.
 - **Contextual Narrative**: It generates a high-level summary of the entire trip, explaining why this specific combination of places was chosen for you.
 - **Budget Balancing**: It ensures the total estimated cost (including entry fees and transport) remains within your specified budget limits.
