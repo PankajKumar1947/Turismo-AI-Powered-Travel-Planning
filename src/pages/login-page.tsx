@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,9 @@ import { loginSchema, registerSchema, type AuthFormData } from "@/schemas/auth.s
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/explore";
+
   const { login } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +53,7 @@ export default function LoginPage() {
         {
           onSuccess: (res) => {
             login(res.data.token, res.data.user);
-            navigate("/explore");
+            navigate(redirectPath);
           },
         }
       );
@@ -60,7 +63,7 @@ export default function LoginPage() {
         {
           onSuccess: (res) => {
             login(res.data.token, res.data.user);
-            navigate("/explore");
+            navigate(redirectPath);
           },
         }
       );

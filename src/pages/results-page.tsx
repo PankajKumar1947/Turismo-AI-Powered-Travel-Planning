@@ -9,11 +9,11 @@ import {
   type AggregatedResponse,
 } from "@/interfaces/recommend.interface";
 import { type RecommendRequest } from "@/schemas/explore.schema";
-import {
-  Clock, Wallet, MapPin, Lightbulb,
-  List, Map as MapIcon,
-} from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useMyItineraries, useSaveItinerary } from "@/hooks/use-itineraries";
+import { useExplore } from "@/context/explore.context";
+import { Bookmark, Check, Clock, Lightbulb, List, Loader2, MapIcon, MapPin, Wallet } from "lucide-react";
 
 interface ResultsState {
   result: {
@@ -21,15 +21,48 @@ interface ResultsState {
     itinerary: AggregatedResponse;
   };
   request: RecommendRequest;
+  isFromHistory?: boolean;
+  savedId?: string;
 }
 
 export default function ResultsPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const saveItinOp = useSaveItinerary();
+
+  const {
+    data: savedItinerariesRes
+  } = useMyItineraries(user?.id);
+  const savedItineraries = savedItinerariesRes?.data || [];
+
+  const {
+    itinerary: contextItinerary,
+    places: contextPlaces,
+    savedRequest: contextRequest,
+    isSaved,
+    setIsSaved
+  } = useExplore();
+
   const state = location.state as ResultsState | null;
   const [viewMode, setViewMode] = useState<"itinerary" | "all-places">("itinerary");
 
-  if (!state) {
+  // Use state from location if available, otherwise fallback to context
+  const displayData = useMemo(() => {
+    if (state) return state;
+    if (contextItinerary && contextPlaces && contextRequest) {
+      return {
+        result: {
+          itinerary: contextItinerary,
+          places: contextPlaces.filter(p => contextItinerary.itinerary.some(item => item.place.name === p.name))
+        },
+        request: contextRequest
+      };
+    }
+    return null;
+  }, [state, contextItinerary, contextPlaces, contextRequest]);
+
+  if (!displayData) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--t-bg)" }}>
         <div className="text-center space-y-4">
@@ -42,8 +75,39 @@ export default function ResultsPage() {
     );
   }
 
-  const { result, request } = state;
+  const { result, request } = displayData;
   const { itinerary, places } = result;
+
+  // Check if this itinerary matches any in the database (by comparing summaries or request IDs if available)
+  const isPreviouslySaved = useMemo(() => {
+    if (state?.isFromHistory) return true;
+    if (isSaved) return true;
+    return savedItineraries.some(it =>
+      it.itinerary.summary === itinerary.summary &&
+      it.city === (request.cityName || "Unknown City")
+    );
+  }, [state, isSaved, savedItineraries, itinerary.summary, request.cityName]);
+
+  const handleSave = () => {
+    if (!isAuthenticated) {
+      navigate("/login?redirect=/results");
+      return;
+    }
+
+    saveItinOp.mutate({
+      city: request.cityName || "Unknown City",
+      itinerary,
+      request,
+      places: contextPlaces?.filter(p => itinerary.itinerary.some(item => item.place.name === p.name)) || places,
+    }, {
+      onSuccess: () => {
+        setIsSaved(true);
+      },
+      onError: (err) => {
+        console.error("Failed to save itinerary", err);
+      }
+    });
+  };
 
   const mapMarkers = viewMode === "itinerary"
     ? itinerary.itinerary.map((item: any) => ({
@@ -84,10 +148,33 @@ export default function ResultsPage() {
       <div className="container mx-auto px-6 py-6">
         {/* Summary */}
         <div
-          className="rounded-2xl p-6 mb-6"
+          className="rounded-2xl p-6 mb-6 relative"
           style={{ background: "var(--t-gradient-hero)", border: "1px solid var(--t-forest-200)" }}
         >
-          <p className="text-lg leading-relaxed" style={{ color: "var(--t-stone-700)" }}>
+          <div className="absolute top-6 right-6">
+            {!isPreviouslySaved ? (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSave}
+                disabled={saveItinOp.isPending}
+                className="t-btn-primary"
+              >
+                {saveItinOp.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Bookmark className="w-4 h-4 mr-2" />
+                )}
+                Save Itinerary
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-forest-50 text-forest-700 border border-forest-100">
+                <Check className="w-3.5 h-3.5" /> Saved to Profile
+              </div>
+            )}
+          </div>
+
+          <p className="text-lg leading-relaxed pr-32" style={{ color: "var(--t-stone-700)" }}>
             {itinerary.summary}
           </p>
           <div className="flex flex-wrap gap-4 mt-4">

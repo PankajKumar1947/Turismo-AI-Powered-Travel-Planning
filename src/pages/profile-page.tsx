@@ -140,6 +140,8 @@ export default function ProfilePage() {
                     state: {
                       result: { places: it.places, itinerary: it.itinerary },
                       request: it.request,
+                      isFromHistory: true,
+                      savedId: it._id,
                     },
                   })
                 }
