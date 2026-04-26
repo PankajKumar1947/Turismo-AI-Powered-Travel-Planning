@@ -1,12 +1,14 @@
 import { axiosInstance } from "../services/api";
 import { authQueries } from "../react-query/auth.queries";
-import type { 
-  RegisterRequest, 
-  LoginRequest, 
-  UpdateMeRequest, 
-  MeResponse,
-  AuthResponse
+import { 
+  type MeResponse,
+  type AuthResponse
 } from "../interfaces/auth.interface";
+import {
+  type RegisterRequest,
+  type LoginRequest,
+  type UpdateMeRequest,
+} from "../schemas/auth.schema";
 
 export async function register(data: RegisterRequest) {
   const response = await axiosInstance.post<AuthResponse>(authQueries.register.endpoint, data);

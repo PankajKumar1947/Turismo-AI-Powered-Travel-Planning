@@ -1,8 +1,8 @@
 import type { 
   AggregatedResponse, 
-  RecommendRequest, 
   PlaceRecommendation 
 } from "./recommend.interface";
+import { type RecommendRequest } from "@/schemas/explore.schema";
 
 export interface SavedItinerary {
   _id: string;

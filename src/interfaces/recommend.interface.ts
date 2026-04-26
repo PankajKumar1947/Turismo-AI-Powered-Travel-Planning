@@ -51,29 +51,6 @@ export interface AggregatedResponse {
   tips: string[];
 }
 
-export type GroupType = "solo" | "couple" | "family" | "friends";
-
-export interface RecommendRequest {
-  location: PlaceLocation;
-  cityName?: string;
-  availableTimeMinutes: number;
-  budgetINR: number;
-  groupType: GroupType;
-  groupSize: number;
-  preferences?: string[];
-}
-
-export interface FetchRoutesRequest {
-  origin: { lat: number; lng: number };
-  selectedPlaces: { name: string; location: { lat: number; lng: number } }[];
-}
-
-export interface AggregateRequest {
-  places: PlaceRecommendation[];
-  routes: Record<string, RouteOption[]>;
-  request: RecommendRequest;
-}
-
 export interface PlacesResponse {
   success: boolean;
   data: PlaceRecommendation[];

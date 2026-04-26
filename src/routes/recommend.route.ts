@@ -1,13 +1,15 @@
 import { axiosInstance } from "../services/api";
 import { recommendQueries } from "../react-query/recommend.queries";
-import type { 
-  RecommendRequest, 
-  PlacesResponse, 
-  FetchRoutesRequest, 
-  RoutesResponse, 
-  AggregateRequest, 
-  AggregateResponseData 
+import { 
+  type PlacesResponse, 
+  type RoutesResponse, 
+  type AggregateResponseData 
 } from "../interfaces/recommend.interface";
+import {
+  type RecommendRequest,
+  type FetchRoutesRequest,
+  type AggregateRequest,
+} from "../schemas/explore.schema";
 
 export async function getPlaces(data: RecommendRequest) {
   const response = await axiosInstance.post<PlacesResponse>(

@@ -12,6 +12,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -25,12 +27,15 @@ import { useSaveItinerary } from "@/hooks/use-itineraries";
 import { useEffect } from "react";
 import PlaceCard from "@/components/place-card";
 import RouteInfo from "@/components/route-info";
-import type {
-  GroupType,
-  RecommendRequest,
-  RouteOption,
-  PlaceRecommendation,
-  AggregatedResponse,
+import {
+  type ExploreFormData,
+  type RecommendRequest,
+  type GroupType,
+} from "@/schemas/explore.schema";
+import {
+  type RouteOption,
+  type PlaceRecommendation,
+  type AggregatedResponse,
 } from "@/interfaces/recommend.interface";
 import type { GeocodeResult } from "@/interfaces/geocode.interface";
 import {
@@ -55,19 +60,40 @@ type WizardStep = "input" | "places" | "routes";
 
 const stepLabels = ["Preferences", "Pick Places", "Pick Routes"];
 
+import { exploreSchema } from "@/schemas/explore.schema";
+
 export default function ExplorePage() {
   const navigate = useNavigate();
   const { location, loading: geoLoading, requestLocation } = useGeolocation();
   const { isAuthenticated } = useAuth();
 
-  const [cityQuery, setCityQuery] = useState("");
   const [resolvedCity, setResolvedCity] = useState("");
   const [manualLocation, setManualLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [time, setTime] = useState([180]);
-  const [budget, setBudget] = useState("");
-  const [groupType, setGroupType] = useState<GroupType>("solo");
-  const [groupSize, setGroupSize] = useState("1");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<ExploreFormData>({
+    resolver: zodResolver(exploreSchema),
+    defaultValues: {
+      cityQuery: "",
+      time: [180],
+      budget: "",
+      groupType: "solo",
+      groupSize: "1",
+      selectedCategories: [],
+    },
+  });
+
+  const cityQuery = watch("cityQuery");
+  const time = watch("time");
+  const groupType = watch("groupType");
+  const selectedCategories = watch("selectedCategories");
 
   const [step, setStep] = useState<WizardStep>("input");
   const [selectedPlaces, setSelectedPlaces] = useState<Set<string>>(new Set());
@@ -107,16 +133,16 @@ export default function ExplorePage() {
     });
   }, [cityQuery, geocodeOp]);
 
-  const handleFindPlaces = useCallback(() => {
-    if (!effectiveLocation || !budget) return;
+  const onSubmit = (data: ExploreFormData) => {
+    if (!effectiveLocation) return;
     const request: RecommendRequest = {
       location: effectiveLocation,
       cityName: resolvedCity || undefined,
-      availableTimeMinutes: time[0]!,
-      budgetINR: parseFloat(budget),
-      groupType,
-      groupSize: parseInt(groupSize) || 1,
-      preferences: selectedCategories.length > 0 ? selectedCategories : undefined,
+      availableTimeMinutes: data.time[0]!,
+      budgetINR: parseFloat(data.budget),
+      groupType: data.groupType,
+      groupSize: parseInt(data.groupSize) || 1,
+      preferences: data.selectedCategories.length > 0 ? data.selectedCategories : undefined,
     };
     setSavedRequest(request);
     placesOp.mutate(request, {
@@ -126,7 +152,7 @@ export default function ExplorePage() {
         setStep("places");
       },
     });
-  }, [effectiveLocation, budget, resolvedCity, time, groupType, groupSize, selectedCategories, placesOp]);
+  };
 
   const handleFindRoutes = useCallback(() => {
     if (!effectiveLocation || !placesOp.data) return;
@@ -188,7 +214,10 @@ export default function ExplorePage() {
   };
 
   const toggleCategory = (cat: string) => {
-    setSelectedCategories((prev) => prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]);
+    const next = selectedCategories.includes(cat)
+      ? selectedCategories.filter((c) => c !== cat)
+      : [...selectedCategories, cat];
+    setValue("selectedCategories", next);
   };
 
   const formatTime = (minutes: number) => {
@@ -203,6 +232,7 @@ export default function ExplorePage() {
     setStep("input");
     setSelectedPlaces(new Set());
     setSelectedRoutes({});
+    reset();
     placesOp.reset();
     routesOp.reset();
     aggregateOp.reset();
@@ -242,7 +272,7 @@ export default function ExplorePage() {
 
         {/* ═══ STEP 1: Input ═══ */}
         {step === "input" && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 animate-in fade-in duration-300">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight" style={{ color: "var(--t-stone-800)" }}>
                 Plan Your <span className="t-gradient-text">Adventure</span>
@@ -251,7 +281,7 @@ export default function ExplorePage() {
                 Set your constraints, and our AI-powered multi-agent system will craft your perfect journey.
               </p>
             </div>
-
+ 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Left Column: Location & Preferences */}
               <div className="lg:col-span-7 space-y-6">
@@ -267,8 +297,7 @@ export default function ExplorePage() {
                     <div className="flex gap-2">
                       <Input
                         placeholder="Search a city (e.g., Kolkata, Paris, Tokyo)"
-                        value={cityQuery}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCityQuery(e.target.value)}
+                        {...register("cityQuery")}
                         onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleCitySearch()}
                         className="flex-1"
                       />
@@ -319,6 +348,7 @@ export default function ExplorePage() {
                       {categories.map((cat) => (
                         <button
                           key={cat}
+                          type="button"
                           onClick={() => toggleCategory(cat)}
                           className="px-4 py-2 rounded-xl text-sm capitalize transition-all font-semibold"
                           style={{
@@ -349,13 +379,19 @@ export default function ExplorePage() {
                       <span className="text-sm" style={{ color: "var(--t-stone-500)" }}>Available duration?</span>
                       <Badge className="t-badge-nature text-base px-3 py-1 font-mono">{formatTime(time[0]!)}</Badge>
                     </div>
-                    <Slider value={time} onValueChange={setTime} min={30} max={4320} step={30} />
+                    <Controller
+                      name="time"
+                      control={control}
+                      render={({ field }) => (
+                        <Slider value={field.value} onValueChange={field.onChange} min={30} max={4320} step={30} />
+                      )}
+                    />
                     <div className="flex justify-between text-xs" style={{ color: "var(--t-stone-400)" }}>
                       <span>30 min</span><span>3 days</span>
                     </div>
                   </CardContent>
                 </Card>
-
+ 
                 {/* Budget */}
                 <Card className="t-card">
                   <CardHeader className="pb-3">
@@ -366,11 +402,17 @@ export default function ExplorePage() {
                   <CardContent>
                     <div className="flex gap-3 items-center">
                       <Label style={{ color: "var(--t-stone-500)" }} className="whitespace-nowrap">Total budget</Label>
-                      <Input type="number" placeholder="e.g., 2000" value={budget} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBudget(e.target.value)} className="flex-1" />
+                      <Input
+                        type="number"
+                        placeholder="e.g., 2000"
+                        {...register("budget")}
+                        className={`flex-1 ${errors.budget ? "border-terra-500" : ""}`}
+                      />
                     </div>
+                    {errors.budget && <p className="text-xs text-terra-600 mt-1">{errors.budget.message}</p>}
                   </CardContent>
                 </Card>
-
+ 
                 {/* Group */}
                 <Card className="t-card">
                   <CardHeader className="pb-3">
@@ -383,10 +425,11 @@ export default function ExplorePage() {
                       {groupTypes.map((gt) => (
                         <button
                           key={gt.value}
+                          type="button"
                           onClick={() => {
-                            setGroupType(gt.value);
-                            if (gt.value === "solo") setGroupSize("1");
-                            if (gt.value === "couple") setGroupSize("2");
+                            setValue("groupType", gt.value);
+                            if (gt.value === "solo") setValue("groupSize", "1");
+                            if (gt.value === "couple") setValue("groupSize", "2");
                           }}
                           className="p-3 rounded-xl border text-center transition-all"
                           style={{
@@ -403,26 +446,32 @@ export default function ExplorePage() {
                     {(groupType === "family" || groupType === "friends") && (
                       <div className="flex gap-3 items-center">
                         <Label style={{ color: "var(--t-stone-500)" }} className="whitespace-nowrap">Group size</Label>
-                        <Input type="number" min="2" max="50" value={groupSize} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGroupSize(e.target.value)} className="w-24" />
+                        <Input
+                          type="number"
+                          min="2"
+                          max="50"
+                          {...register("groupSize")}
+                          className="w-24"
+                        />
                       </div>
                     )}
                   </CardContent>
                 </Card>
               </div>
             </div>
-
+ 
             {currentError && (
               <div className="text-sm text-center rounded-xl p-3 mt-8" style={{ background: "var(--t-terra-50)", color: "var(--t-terra-700)", border: "1px solid var(--t-terra-200)" }}>
                 {currentError}
               </div>
             )}
-
+ 
             <div className="mt-10 max-w-2xl mx-auto">
               <Button
+                type="submit"
                 size="lg"
                 className="w-full text-xl py-8 rounded-2xl t-btn-primary shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50"
-                onClick={handleFindPlaces}
-                disabled={placesOp.isPending || !effectiveLocation || !budget}
+                disabled={placesOp.isPending || !effectiveLocation}
               >
                 {placesOp.isPending ? (
                   <><Loader2 className="w-6 h-6 mr-2 animate-spin" /> Discovery Specialist Agent is finding places...</>
@@ -431,7 +480,7 @@ export default function ExplorePage() {
                 )}
               </Button>
             </div>
-          </div>
+          </form>
         )}
 
 

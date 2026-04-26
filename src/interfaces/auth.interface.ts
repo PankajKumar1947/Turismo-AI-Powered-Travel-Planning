@@ -4,7 +4,7 @@ export interface AuthUser {
   email: string;
   preferences: {
     categories: string[];
-    budgetRange: string;
+    budgetRange?: string;
   };
   createdAt: string;
 }
@@ -14,25 +14,6 @@ export interface AuthResponse {
   data: {
     token: string;
     user: AuthUser;
-  };
-}
-
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface UpdateMeRequest {
-  name?: string;
-  preferences?: {
-    categories?: string[];
-    budgetRange?: string;
   };
 }
 

@@ -10,14 +10,16 @@ import {
   forward, 
   reverse 
 } from "@/routes/geocode.route";
-import type { 
-  PlaceRecommendation, 
-  RecommendRequest, 
-  RouteOption, 
-  AggregatedResponse, 
-  FetchRoutesRequest,
-  AggregateRequest
+import { 
+  type PlaceRecommendation, 
+  type RouteOption, 
+  type AggregatedResponse, 
 } from "@/interfaces/recommend.interface";
+import {
+  type RecommendRequest,
+  type FetchRoutesRequest,
+  type AggregateRequest,
+} from "@/schemas/explore.schema";
 import type { GeocodeResult } from "@/interfaces/geocode.interface";
 
 export function useFindPlaces() {
