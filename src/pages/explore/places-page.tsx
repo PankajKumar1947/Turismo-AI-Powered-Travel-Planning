@@ -8,7 +8,7 @@ import type {
   RouteOption,
 } from "@/interfaces/recommend.interface";
 import {
-  Loader2, ArrowLeft, ArrowRight, Sparkles, Check, Leaf,
+  ArrowLeft, ArrowRight, Sparkles, Check, Leaf,
 } from "lucide-react";
 import { useExplore } from "@/context/explore.context";
 import { AgentLoadingDialog } from "@/components/agent-loading-dialog";

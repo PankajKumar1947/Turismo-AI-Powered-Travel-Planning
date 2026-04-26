@@ -10,7 +10,7 @@ import type {
   AggregatedResponse,
 } from "@/interfaces/recommend.interface";
 import {
-  MapPin, Loader2, Navigation, ArrowLeft, ArrowRight, Sparkles, Check,
+  MapPin, Navigation, ArrowLeft, ArrowRight, Sparkles, Check,
 } from "lucide-react";
 import { useExplore } from "@/context/explore.context";
 import { AgentLoadingDialog } from "@/components/agent-loading-dialog";
