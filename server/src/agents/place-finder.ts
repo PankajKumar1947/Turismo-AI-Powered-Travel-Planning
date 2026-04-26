@@ -50,7 +50,7 @@ You MUST respond with a valid JSON object in this exact format:
 }
 
 Rules:
-- Return 8-15 places, sorted by score (highest first)
+- Return 7-10 places, sorted by score (highest first)
 - Score is 0-100 based on: rating, cost efficiency, time efficiency, seasonal relevance, popularity
 - estimatedCostPerPerson should be in the local currency (INR for India, USD for USA, EUR for Europe, etc.)
 - estimatedTimeToSpend is in minutes

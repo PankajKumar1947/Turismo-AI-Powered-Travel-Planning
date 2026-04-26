@@ -13,6 +13,7 @@ import {
   MapPin, Loader2, Navigation, ArrowLeft, ArrowRight, Sparkles, Check,
 } from "lucide-react";
 import { useExplore } from "@/context/explore.context";
+import { AgentLoadingDialog } from "@/components/agent-loading-dialog";
 
 export default function RoutesPage() {
   const navigate = useNavigate();
@@ -80,6 +81,7 @@ export default function RoutesPage() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
+      <AgentLoadingDialog isOpen={aggregateOp.isPending} agentName="Aggregator" />
       <div className="text-center mb-4">
         <div className="t-badge-info inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium mb-3">
           <Navigation className="w-3.5 h-3.5" /> Logistics Expert Agent
@@ -153,7 +155,7 @@ export default function RoutesPage() {
           disabled={aggregateOp.isPending}
         >
           {aggregateOp.isPending ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Building itinerary...</>
+            "Building itinerary..."
           ) : (
             <>Build My Itinerary <ArrowRight className="w-4 h-4 ml-2" /></>
           )}

@@ -11,6 +11,7 @@ import {
   Loader2, ArrowLeft, ArrowRight, Sparkles, Check, Leaf,
 } from "lucide-react";
 import { useExplore } from "@/context/explore.context";
+import { AgentLoadingDialog } from "@/components/agent-loading-dialog";
 
 export default function PlacesPage() {
   const navigate = useNavigate();
@@ -66,6 +67,7 @@ export default function PlacesPage() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-300">
+      <AgentLoadingDialog isOpen={routesOp.isPending} agentName="Logistics Expert" />
       <div className="text-center mb-4">
         <div className="t-badge-nature inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium mb-3">
           <Leaf className="w-3.5 h-3.5" /> Discovery Specialist Agent
@@ -74,14 +76,14 @@ export default function PlacesPage() {
           {places.length} Places Found
         </h2>
         <p style={{ color: "var(--t-stone-500)" }}>
-          Top 5 are pre-selected (agent's pick). Select the ones you'd like to visit.
+          Top 2 are pre-selected (agent's pick). Select the ones you'd like to visit.
         </p>
       </div>
 
       <div className="space-y-3">
         {places.map((place: PlaceRecommendation, idx: number) => {
           const isSelected = selectedPlaces.includes(place.name);
-          const isAgentPick = idx < 5;
+          const isAgentPick = idx < 2;
           return (
             <div
               key={place.name}
@@ -131,7 +133,7 @@ export default function PlacesPage() {
           disabled={routesOp.isPending || selectedPlaces.length === 0}
         >
           {routesOp.isPending ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Finding routes...</>
+            "Agent is finding routes..."
           ) : (
             <>Find Routes ({selectedPlaces.length}) <ArrowRight className="w-4 h-4 ml-2" /></>
           )}
