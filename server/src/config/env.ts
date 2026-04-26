@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+dotenv.config();
 
 export const config = {
   port: parseInt(process.env.PORT || "5000", 10),

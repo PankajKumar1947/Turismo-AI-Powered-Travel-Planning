@@ -1,23 +1,23 @@
 import express from "express";
 import cors from "cors";
-import authRoutes from "./routes/auth";
-import recommendRoutes from "./routes/recommend";
-import itineraryRoutes from "./routes/itinerary";
-import geocodeRoutes from "./routes/geocode";
+import authRoutes from "./modules/auth/auth.route";
+import recommendRoutes from "./modules/recommend/recommend.route";
+import itineraryRoutes from "./modules/itinerary/itinerary.route";
+import geocodeRoutes from "./modules/geocode/geocode.route";
+import { errorMiddleware } from "./middleware/error.middleware";
 
 const app = express();
 
-// ── Middleware ──
+// middleware
 app.use(cors());
 app.use(express.json());
 
-// ── Routes ──
+// routes
 app.use("/api/auth", authRoutes);
 app.use("/api/recommend", recommendRoutes);
 app.use("/api/itineraries", itineraryRoutes);
 app.use("/api/geocode", geocodeRoutes);
 
-// ── Health check ──
 app.get("/", (_req, res) => {
   res.json({ status: "ok", service: "turismo-api" });
 });
@@ -25,5 +25,8 @@ app.get("/", (_req, res) => {
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+// error handler
+app.use(errorMiddleware);
 
 export default app;

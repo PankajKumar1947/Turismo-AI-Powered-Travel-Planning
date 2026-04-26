@@ -1,5 +1,5 @@
 import mongoose, { Schema, type Document } from "mongoose";
-import type { AggregatedResponse, RecommendRequest, PlaceRecommendation } from "../types";
+import type { AggregatedResponse, RecommendRequest, PlaceRecommendation } from "../../types";
 
 export interface ISavedItinerary extends Document {
   userId: mongoose.Types.ObjectId;
