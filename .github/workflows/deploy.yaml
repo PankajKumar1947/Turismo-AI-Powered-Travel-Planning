@@ -22,6 +22,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }} # SSH_USERNAME -> we will give in github repository secret
           key: ${{ secrets.SSH_KEY }} # SSH_KEY -> we will give in github repository secret
           script: |
-            cd /Turismo-AI-Powered-Travel-Planning
+            cd /root/Turismo-AI-Powered-Travel-Planning
             git pull
             docker-compose up -d --build
