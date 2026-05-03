@@ -19,7 +19,7 @@ app.use("/api/itineraries", itineraryRoutes);
 app.use("/api/geocode", geocodeRoutes);
 
 app.get("/", (_req, res) => {
-  res.json({ status: "ok", service: "turismo-api" });
+  res.send("Turismo AI Server is Live");
 });
 
 app.get("/api/health", (_req, res) => {
