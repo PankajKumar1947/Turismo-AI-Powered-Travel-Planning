@@ -1,0 +1,27 @@
+name: Deploy server to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # predefined action to get the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # our job
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }} # SSH_HOST -> we will give in github repository secret
+          username: ${{ secrets.SSH_USERNAME }} # SSH_USERNAME -> we will give in github repository secret
+          key: ${{ secrets.SSH_KEY }} # SSH_KEY -> we will give in github repository secret
+          script: |
+            cd /Turismo-AI-Powered-Travel-Planning
+            git pull
+            docker-compose up -d --build
