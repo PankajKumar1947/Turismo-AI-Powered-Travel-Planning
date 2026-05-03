@@ -25,4 +25,4 @@ jobs:
             cd /root/Turismo-AI-Powered-Travel-Planning
             git pull
             cd server
-            docker-compose up -d --build
+            docker compose up -d --build
