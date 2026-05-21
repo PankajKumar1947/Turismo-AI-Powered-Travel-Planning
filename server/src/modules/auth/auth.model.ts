@@ -8,6 +8,9 @@ export interface IUser extends Document {
     categories: string[];
     budgetRange: string;
   };
+  isVerified: boolean;
+  verificationOtp?: string;
+  verificationOtpExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +24,9 @@ const userSchema = new Schema<IUser>(
       categories: { type: [String], default: [] },
       budgetRange: { type: String, default: "medium" },
     },
+    isVerified: { type: Boolean, default: false },
+    verificationOtp: { type: String },
+    verificationOtpExpires: { type: Date },
   },
   { timestamps: true }
 );

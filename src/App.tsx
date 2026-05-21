@@ -8,6 +8,7 @@ import ResultsPage from "@/pages/results-page";
 import LoginPage from "@/pages/login-page";
 import ProfilePage from "@/pages/profile-page";
 import PrivacyPolicy from "@/pages/privacy-policy";
+import VerifyOtpPage from "@/pages/verify-otp-page";
 import { ExploreProvider } from "@/context/explore-provider";
 import { Navigate } from "react-router-dom";
 import PreferencesPage from "./pages/explore/preferences-page";
@@ -43,6 +44,7 @@ function App() {
               </Route>
               <Route path="/results" element={<ResultsPage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/verify-otp" element={<VerifyOtpPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
             </Routes>

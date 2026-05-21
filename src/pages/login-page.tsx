@@ -55,6 +55,11 @@ export default function LoginPage() {
             login(res.data.token, res.data.user);
             navigate(redirectPath);
           },
+          onError: (err: any) => {
+            if (err.response?.status === 403) {
+              navigate(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+            }
+          },
         }
       );
     } else {
@@ -62,8 +67,7 @@ export default function LoginPage() {
         { name: data.name!, email: data.email, password: data.password },
         {
           onSuccess: (res) => {
-            login(res.data.token, res.data.user);
-            navigate(redirectPath);
+            navigate(`/verify-otp?email=${encodeURIComponent(res.data.email)}`);
           },
         }
       );

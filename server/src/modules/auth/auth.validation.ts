@@ -21,6 +21,18 @@ export const updateSchema = z.object({
     .optional(),
 });
 
+export const verifyOtpSchema = z.object({
+  email: z.string().email(),
+  otp: z.string().length(6),
+});
+
+export const resendOtpSchema = z.object({
+  email: z.string().email(),
+});
+
 export type RegisterDTO = z.infer<typeof registerSchema>;
 export type LoginDTO = z.infer<typeof loginSchema>;
 export type UpdateProfileDTO = z.infer<typeof updateSchema>;
+export type VerifyOtpDTO = z.infer<typeof verifyOtpSchema>;
+export type ResendOtpDTO = z.infer<typeof resendOtpSchema>;
+

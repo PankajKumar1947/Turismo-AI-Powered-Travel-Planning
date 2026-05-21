@@ -15,4 +15,12 @@ export const authQueries = {
     key: ["auth", "updateMe"],
     endpoint: "/api/auth/me",
   },
+  verifyOtp: {
+    key: ["auth", "verifyOtp"],
+    endpoint: "/api/auth/verify-otp",
+  },
+  resendOtp: {
+    key: ["auth", "resendOtp"],
+    endpoint: "/api/auth/resend-otp",
+  },
 };

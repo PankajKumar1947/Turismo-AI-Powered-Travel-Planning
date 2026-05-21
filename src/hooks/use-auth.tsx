@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext, type AuthContextType } from "@/context/auth-context";
-import type { AuthResponse } from "@/interfaces/auth.interface";
-import { login, register } from "@/routes/auth.route";
+import type { AuthResponse, RegisterResponse, VerifyOtpResponse, ResendOtpResponse } from "@/interfaces/auth.interface";
+import { login, register, verifyOtp, resendOtp } from "@/routes/auth.route";
 
 export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
@@ -17,7 +17,19 @@ export function useLogin() {
 }
 
 export function useRegister() {
-  return useMutation<AuthResponse, Error, Parameters<typeof register>[0]>({
+  return useMutation<RegisterResponse, Error, Parameters<typeof register>[0]>({
     mutationFn: register,
+  });
+}
+
+export function useVerifyOtp() {
+  return useMutation<VerifyOtpResponse, Error, Parameters<typeof verifyOtp>[0]>({
+    mutationFn: verifyOtp,
+  });
+}
+
+export function useResendOtp() {
+  return useMutation<ResendOtpResponse, Error, Parameters<typeof resendOtp>[0]>({
+    mutationFn: resendOtp,
   });
 }
