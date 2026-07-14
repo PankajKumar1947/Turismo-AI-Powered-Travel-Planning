@@ -32,6 +32,12 @@ export function ExploreProvider({ children }: { children: ReactNode }) {
   const setResolvedCity = useCallback((resolvedCity: string) =>
     setState(s => ({ ...s, resolvedCity })), []);
 
+  const setSourceLocation = useCallback((sourceLocation: { lat: number; lng: number } | null) =>
+    setState(s => ({ ...s, sourceLocation })), []);
+
+  const setSourceCity = useCallback((sourceCity: string) =>
+    setState(s => ({ ...s, sourceCity })), []);
+
   const setPlaces = useCallback((places: PlaceRecommendation[]) =>
     setState(s => ({ ...s, places })), []);
 
@@ -62,6 +68,8 @@ export function ExploreProvider({ children }: { children: ReactNode }) {
     setFormData,
     setLocation,
     setResolvedCity,
+    setSourceLocation,
+    setSourceCity,
     setPlaces,
     setSelectedPlaces,
     setRoutes,
@@ -75,6 +83,8 @@ export function ExploreProvider({ children }: { children: ReactNode }) {
     setFormData,
     setLocation,
     setResolvedCity,
+    setSourceLocation,
+    setSourceCity,
     setPlaces,
     setSelectedPlaces,
     setRoutes,
