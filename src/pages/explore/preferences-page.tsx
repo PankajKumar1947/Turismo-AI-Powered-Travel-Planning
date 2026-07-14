@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,8 @@ export default function PreferencesPage() {
     formData, setFormData,
     location: storedLocation, setLocation,
     resolvedCity, setResolvedCity,
+    sourceLocation, setSourceLocation,
+    sourceCity, setSourceCity,
     setPlaces, setSelectedPlaces, setSavedRequest
   } = useExplore();
 
@@ -81,6 +83,7 @@ export default function PreferencesPage() {
   const placesOp = useFindPlaces();
   const geocodeOp = useGeocodeForward();
   const geocodeReverseOp = useGeocodeReverse();
+  const sourceGeocodeOp = useGeocodeForward();
 
   const effectiveLocation = geoLoc || storedLocation;
 
@@ -96,6 +99,8 @@ export default function PreferencesPage() {
     }
   }, [geoLoc, storedLocation, geocodeReverseOp, setLocation, setResolvedCity]);
 
+  const [sourceQuery, setSourceQuery] = useState("");
+
   const handleCitySearch = useCallback(() => {
     if (!cityQuery.trim()) return;
     geocodeOp.mutate(cityQuery, {
@@ -108,6 +113,31 @@ export default function PreferencesPage() {
       },
     });
   }, [cityQuery, geocodeOp, setLocation, setResolvedCity]);
+
+  const handleSourceSearch = useCallback(() => {
+    if (!sourceQuery.trim()) return;
+    sourceGeocodeOp.mutate(sourceQuery, {
+      onSuccess: (result: { data: GeocodeResult }) => {
+        if (result.data) {
+          setSourceLocation({ lat: result.data.lat, lng: result.data.lng });
+          setSourceCity(result.data.displayName);
+        }
+      },
+    });
+  }, [sourceQuery, sourceGeocodeOp, setSourceLocation, setSourceCity]);
+
+  const handleSourceGeolocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setSourceLocation(loc);
+        setSourceCity("My Location");
+      },
+      () => {},
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [setSourceLocation, setSourceCity]);
 
   const onSubmit = (data: ExploreFormData) => {
     if (!effectiveLocation) return;
@@ -214,6 +244,33 @@ export default function PreferencesPage() {
                     </div>
                   </div>
                 )}
+
+                <div className="h-px" style={{ background: "var(--t-border)" }} />
+
+                <div className="space-y-3">
+                  <span className="text-xs font-semibold" style={{ color: "var(--t-stone-400)" }}>FROM (YOUR STARTING POINT)</span>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g., Delhi, Mumbai"
+                      value={sourceQuery}
+                      onChange={(e) => setSourceQuery(e.target.value)}
+                      onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleSourceSearch()}
+                      className="flex-1"
+                    />
+                    <Button variant="secondary" onClick={handleSourceSearch} disabled={sourceGeocodeOp.isPending} type="button" size="sm">
+                      {sourceGeocodeOp.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                    </Button>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleSourceGeolocation} type="button" className="w-full text-xs">
+                    <Navigation className="w-3 h-3 mr-1" /> Use My Current Location
+                  </Button>
+                  {sourceLocation && (
+                    <div className="p-2 rounded-xl bg-sky-50/50 border border-sky-100 flex items-center gap-2 text-sm" style={{ color: "var(--t-sky-700)" }}>
+                      <Navigation className="w-3.5 h-3.5 shrink-0" />
+                      <span className="font-medium truncate">{sourceCity || "Location set"}</span>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
