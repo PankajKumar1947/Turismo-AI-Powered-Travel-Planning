@@ -238,7 +238,7 @@ export default function ResultsPage() {
                   <Separator />
                   <div className="flex justify-between items-center font-semibold" style={{ color: "var(--t-stone-800)" }}>
                     <span>Total</span>
-                    <span>{itinerary.totalEstimatedCost.toLocaleString()}</span>
+                    <span>{itinerary.budgetBreakdown.reduce((s: number, i: any) => s + i.amount, 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
