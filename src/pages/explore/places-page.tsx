@@ -18,7 +18,7 @@ export default function PlacesPage() {
   const { 
     places, 
     selectedPlaces, setSelectedPlaces,
-    location,
+    location, sourceLocation,
     setRoutes, setSelectedRoutes
   } = useExplore();
 
@@ -36,7 +36,7 @@ export default function PlacesPage() {
     const selected = places.filter((p) => selectedPlaces.includes(p.name));
     routesOp.mutate(
       { 
-        origin: location, 
+        origin: sourceLocation || location, 
         selectedPlaces: selected.map((p) => ({ name: p.name, location: p.location })) 
       },
       {
