@@ -6,6 +6,8 @@ export interface ExploreState {
   formData: ExploreFormData;
   location: { lat: number; lng: number } | null;
   resolvedCity: string;
+  sourceLocation: { lat: number; lng: number } | null;
+  sourceCity: string;
   places: PlaceRecommendation[] | null;
   selectedPlaces: string[];
   routes: Record<string, RouteOption[]> | null;
@@ -19,6 +21,8 @@ export interface ExploreContextType extends ExploreState {
   setFormData: (data: ExploreFormData) => void;
   setLocation: (loc: { lat: number; lng: number } | null) => void;
   setResolvedCity: (city: string) => void;
+  setSourceLocation: (loc: { lat: number; lng: number } | null) => void;
+  setSourceCity: (city: string) => void;
   setPlaces: (places: PlaceRecommendation[]) => void;
   setSelectedPlaces: (places: string[]) => void;
   setRoutes: (routes: Record<string, RouteOption[]>) => void;
@@ -54,6 +58,8 @@ export const initialState: ExploreState = {
   formData: initialFormData,
   location: null,
   resolvedCity: "",
+  sourceLocation: null,
+  sourceCity: "",
   places: null,
   selectedPlaces: [],
   routes: null,
